@@ -1,5 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0b0d10"/>
-  <path d="M15 12v40m0-20 24-20M15 32l24 20" stroke="#ff3548" stroke-width="5" fill="none" stroke-linecap="square"/>
-  <path d="M38 12h13L39 32l12 20H38" stroke="#83ddff" stroke-width="5" fill="none" stroke-linejoin="miter"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Símbolo KZ de KAZVORA Technologies</title>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff2638"/>
+      <stop offset="1" stop-color="#d90035"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#23e0ff"/>
+      <stop offset="1" stop-color="#0878ed"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff3298"/>
+      <stop offset="0.48" stop-color="#20cfff"/>
+      <stop offset="1" stop-color="#08a8f4"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="13" fill="#05070c"/>
+  <!-- K angular, red -->
+  <path d="M10 51V19L20 9V27L35 9H48L29 28L44 43H31L20 33V42Z" fill="url(#red)"/>
+  <!-- Z angular, sky blue -->
+  <path d="M39 12H57L43 28H53L59 35H37L49 21H31Z" fill="url(#blue)"/>
+  <!-- flowing central stroke, recalling the original KZ mark -->
+  <path d="M10 51C19 38 25 27 33 27C41 27 44 39 55 43H43C36 40 34 33 30 33C25 33 19 43 10 51Z" fill="url(#flow)"/>
 </svg>
