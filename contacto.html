@@ -1,7 +1,184 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b0d10"><meta name="description" content="Contacta a KAZVORA Technologies para conversar sobre tu idea."><title>Contacto | KAZVORA Technologies</title><link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/styles.css"><script src="js/main.js" defer></script></head>
-<body><a class="skip-link" href="#contenido">Saltar al contenido</a><header class="site-header"><a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio"><span class="brand-mark" aria-hidden="true">K<span>Z</span></span><span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú"><span></span><span></span><span></span></button><nav id="main-nav" class="main-nav" aria-label="Navegación principal"><a href="index.html">Inicio</a><a href="portafolio.html">Portafolio</a><a href="servicios.html">Servicios</a><a href="nosotros.html">Nosotros</a><a class="nav-contact active" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a></nav></header>
-<main id="contenido"><section class="page-hero section-wrap"><p class="eyebrow">CONTACTO</p><h1>Cuéntanos tu <span class="gradient-text">idea.</span></h1><p>Comparte qué necesitas y podremos definir el alcance, los próximos pasos y una propuesta realista.</p></section>
-<section class="section-wrap contact-layout"><div class="contact-info"><div class="contact-card"><span class="contact-card-icon blue-symbol">↗</span><h2>Hablemos de tu proyecto</h2><p>La forma más directa de comenzar es enviarnos un mensaje por WhatsApp. El enlace se activará cuando configuremos el número oficial de negocio.</p><span class="service-status">WhatsApp pendiente de configurar</span></div><div class="contact-card contact-card-small"><span class="eyebrow">QUÉ NOS AYUDA A SABER</span><ul><li>Qué necesitas resolver</li><li>Para quién es el proyecto</li><li>Qué plazo tienes en mente</li><li>Qué funciones son indispensables</li></ul></div></div>
-<form class="contact-form" id="contact-form"><h2>Prepara tu consulta</h2><p>Completa los campos y se preparará un mensaje para que lo copies o lo envíes cuando configuremos el canal de contacto.</p><label for="name">Tu nombre</label><input id="name" name="name" autocomplete="name" required placeholder="¿Cómo te llamas?"><label for="email">Correo electrónico (opcional)</label><input id="email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com"><label for="project-type">Tipo de proyecto</label><select id="project-type" name="project-type"><option>Desarrollo web</option><option>Catálogo digital</option><option>Consulta general</option><option>Otro proyecto</option></select><label for="message">¿Qué necesitas?</label><textarea id="message" name="message" rows="5" required placeholder="Cuéntanos brevemente tu idea..."></textarea><button class="button button-primary" type="submit">Preparar mensaje <span>↗</span></button><p id="form-feedback" class="form-feedback" aria-live="polite"></p></form></section></main>
-<footer class="site-footer"><a class="brand footer-brand" href="index.html"><span class="brand-mark" aria-hidden="true">K<span>Z</span></span><span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span></a><p>Tecnología que convierte ideas en soluciones.</p><div class="footer-bottom"><span>© <span id="year"></span> KAZVORA Technologies</span><span>Construido con intención. Diseñado para crecer.</span></div></footer></body></html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0d10">
+    <meta name="description" content="Contacta a KAZVORA Technologies para conversar sobre tu idea.">
+
+    <title>Contacto | KAZVORA Technologies</title>
+
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script src="js/main.js" defer></script>
+</head>
+
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    <header class="site-header">
+        <a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
+            <img
+                class="brand-icon"
+                src="assets/icons/favicon.svg"
+                alt=""
+                width="44"
+                height="44"
+            >
+            <span class="brand-copy">
+                <strong>KAZVORA</strong>
+                <small>TECHNOLOGIES</small>
+            </span>
+        </a>
+
+        <button
+            class="menu-toggle"
+            aria-expanded="false"
+            aria-controls="main-nav"
+            aria-label="Abrir menú"
+            type="button"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
+            <a href="index.html">Inicio</a>
+            <a href="portafolio.html">Portafolio</a>
+            <a href="servicios.html">Servicios</a>
+            <a href="nosotros.html">Nosotros</a>
+            <a class="nav-contact active" href="contacto.html" aria-current="page">
+                Contacto <span aria-hidden="true">↗</span>
+            </a>
+        </nav>
+    </header>
+
+    <main id="contenido">
+        <section class="page-hero section-wrap">
+            <p class="eyebrow">CONTACTO</p>
+
+            <h1>
+                Cuéntanos tu <span class="gradient-text">idea.</span>
+            </h1>
+
+            <p>
+                Comparte qué necesitas y podremos definir el alcance,
+                los próximos pasos y una propuesta realista.
+            </p>
+        </section>
+
+        <section class="section-wrap contact-layout">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <span class="contact-card-icon blue-symbol" aria-hidden="true">↗</span>
+
+                    <h2>Hablemos de tu proyecto</h2>
+
+                    <p>
+                        La forma más directa de comenzar es enviarnos un mensaje
+                        por WhatsApp. El enlace se activará cuando configuremos
+                        el número oficial de negocio.
+                    </p>
+
+                    <span class="service-status">
+                        WhatsApp pendiente de configurar
+                    </span>
+                </div>
+
+                <div class="contact-card contact-card-small">
+                    <span class="eyebrow">QUÉ NOS AYUDA A SABER</span>
+
+                    <ul>
+                        <li>Qué necesitas resolver</li>
+                        <li>Para quién es el proyecto</li>
+                        <li>Qué plazo tienes en mente</li>
+                        <li>Qué funciones son indispensables</li>
+                    </ul>
+                </div>
+            </div>
+
+            <form class="contact-form" id="contact-form">
+                <h2>Prepara tu consulta</h2>
+
+                <p>
+                    Completa los campos y se preparará un mensaje para que lo
+                    copies o lo envíes cuando configuremos el canal de contacto.
+                </p>
+
+                <label for="name">Tu nombre</label>
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    autocomplete="name"
+                    required
+                    placeholder="¿Cómo te llamas?"
+                >
+
+                <label for="email">Correo electrónico (opcional)</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="tu@correo.com"
+                >
+
+                <label for="project-type">Tipo de proyecto</label>
+                <select id="project-type" name="project-type">
+                    <option value="Desarrollo web">Desarrollo web</option>
+                    <option value="Catálogo digital">Catálogo digital</option>
+                    <option value="Consulta general">Consulta general</option>
+                    <option value="Otro proyecto">Otro proyecto</option>
+                </select>
+
+                <label for="message">¿Qué necesitas?</label>
+                <textarea
+                    id="message"
+                    name="message"
+                    rows="5"
+                    required
+                    placeholder="Cuéntanos brevemente tu idea..."
+                ></textarea>
+
+                <button class="button button-primary" type="submit">
+                    Preparar mensaje <span aria-hidden="true">↗</span>
+                </button>
+
+                <p
+                    id="form-feedback"
+                    class="form-feedback"
+                    aria-live="polite"
+                ></p>
+            </form>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand footer-brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
+            <img
+                class="brand-icon"
+                src="assets/icons/favicon.svg"
+                alt=""
+                width="44"
+                height="44"
+            >
+            <span class="brand-copy">
+                <strong>KAZVORA</strong>
+                <small>TECHNOLOGIES</small>
+            </span>
+        </a>
+
+        <p>Tecnología que convierte ideas en soluciones.</p>
+
+        <div class="footer-bottom">
+            <span>
+                © <span id="year"></span> KAZVORA Technologies
+            </span>
+            <span>Construido con intención. Diseñado para crecer.</span>
+        </div>
+    </footer>
+</body>
+</html>

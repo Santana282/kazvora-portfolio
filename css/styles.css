@@ -404,6 +404,11 @@ button {
   transform: translateY(0);
 }
 
+.button-primary {
+  background: var(--gradient);
+  color: #0b0d10;
+}
+
 .button-secondary {
   border-color: #36414e;
   background: #151a21;
