@@ -1,0 +1,908 @@
+/* ==========================================================================
+   Demostración Comercial #1: Dulce Atelier (demos/reposteria/styles.css)
+   Desarrollado por KAZVORA Technologies
+   ========================================================================== */
+
+:root {
+  --bakery-bg: #161012;
+  --bakery-surface: #22191c;
+  --bakery-surface-2: #2d2126;
+  --bakery-card: #261c20;
+
+  --bakery-cream: #fdf6f0;
+  --bakery-muted: #c9b6bc;
+  --bakery-soft: #968188;
+
+  --bakery-berry: #e84a67;
+  --bakery-berry-dark: #c43550;
+  --bakery-gold: #f3c677;
+  --bakery-mint: #25d366;
+
+  --kazvora-bg: #0b0d10;
+  --kazvora-red: #ff454f;
+  --kazvora-blue: #83ddff;
+
+  --border-warm: rgba(243, 198, 119, 0.16);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --max-width: 1200px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bakery-bg);
+  color: var(--bakery-cream);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(232, 74, 103, 0.14), transparent 36%),
+    radial-gradient(circle at 85% 16%, rgba(243, 198, 119, 0.1), transparent 35%),
+    var(--bakery-bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 999;
+  background: var(--bakery-berry);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.bakery-wrap {
+  width: min(100% - 2rem, var(--max-width));
+  margin-inline: auto;
+}
+
+/* 1. Barra Institucional Superior de KAZVORA Technologies */
+.kazvora-demo-bar {
+  background: var(--kazvora-bg);
+  border-bottom: 1px solid rgba(131, 221, 255, 0.24);
+  font-size: 0.82rem;
+  padding: 0.55rem 1rem;
+}
+
+.demo-bar-inner {
+  width: min(100%, var(--max-width));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.kazvora-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #f4f7fb;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.kazvora-badge img {
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.kazvora-badge strong {
+  color: var(--kazvora-red);
+}
+
+.demo-disclaimer {
+  color: #a2adb9;
+}
+
+.demo-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.demo-bar-links a {
+  color: var(--kazvora-blue);
+  font-weight: 600;
+}
+
+.demo-bar-links a.demo-cta-quote {
+  background: rgba(255, 69, 79, 0.16);
+  border: 1px solid rgba(255, 69, 79, 0.4);
+  color: #ffffff;
+  padding: 0.28rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+/* 2. Encabezado de Dulce Atelier */
+.bakery-header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(22, 16, 18, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-warm);
+  padding-block: 0.9rem;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.bakery-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bakery-emblem {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bakery-berry), #9d2842);
+  color: var(--bakery-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: 1px solid var(--bakery-gold);
+}
+
+.bakery-brand strong {
+  display: block;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+}
+
+.bakery-brand small {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  color: var(--bakery-gold);
+}
+
+.bakery-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.92rem;
+}
+
+.bakery-nav a {
+  color: var(--bakery-muted);
+  font-weight: 500;
+}
+
+.bakery-nav a:hover {
+  color: var(--bakery-cream);
+}
+
+.order-pill-btn {
+  background: rgba(232, 74, 103, 0.18);
+  border: 1px solid var(--bakery-berry);
+  color: var(--bakery-cream) !important;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-weight: 700 !important;
+}
+
+/* 3. Hero de la Repostería */
+.bakery-hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.5rem;
+  align-items: center;
+  padding-block: 3.5rem 2.5rem;
+}
+
+.demo-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--bakery-gold);
+  background: rgba(243, 198, 119, 0.12);
+  border: 1px solid var(--border-warm);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: 1rem;
+}
+
+.hero-content h1 {
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  line-height: 1.12;
+  margin-bottom: 1rem;
+}
+
+.highlight-berry {
+  background: linear-gradient(120deg, var(--bakery-berry), var(--bakery-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-content p {
+  color: var(--bakery-muted);
+  font-size: 1.04rem;
+  max-width: 56ch;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.75rem;
+}
+
+.btn-bakery {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.78rem 1.35rem;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-bakery:hover {
+  transform: translateY(-2px);
+}
+
+.btn-bakery-primary {
+  background: linear-gradient(135deg, var(--bakery-berry), var(--bakery-berry-dark));
+  color: #ffffff;
+}
+
+.btn-bakery-outline {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-warm);
+  color: var(--bakery-cream);
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  margin-top: 2.2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.hero-metrics strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--bakery-gold);
+}
+
+.hero-metrics span {
+  font-size: 0.8rem;
+  color: var(--bakery-muted);
+}
+
+/* Ilustración CSS del pastel en Hero */
+.showcase-card {
+  background: radial-gradient(circle at top, #332329, var(--bakery-surface));
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+.showcase-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  color: var(--bakery-gold);
+  border: 1px solid var(--border-warm);
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: 1.5rem;
+}
+
+.cake-illustration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-block: 1rem 1.6rem;
+}
+
+.cake-top-berries {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: -4px;
+  z-index: 2;
+}
+
+.cake-top-berries span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bakery-berry);
+  box-shadow: 0 0 10px rgba(232, 74, 103, 0.6);
+}
+
+.cake-layer {
+  background: linear-gradient(90deg, #8e243d, #b83352, #8e243d);
+  border-radius: 10px 10px 4px 4px;
+  border-top: 4px solid #fdf6f0;
+}
+
+.layer-top {
+  width: 140px;
+  height: 46px;
+}
+
+.cake-Middle-cream {
+  width: 150px;
+  height: 10px;
+  background: var(--bakery-cream);
+  border-radius: 6px;
+}
+
+.layer-bottom {
+  width: 180px;
+  height: 56px;
+}
+
+.cake-plate {
+  width: 220px;
+  height: 10px;
+  background: linear-gradient(90deg, #b89254, var(--bakery-gold), #b89254);
+  border-radius: var(--radius-pill);
+  margin-top: 2px;
+}
+
+.showcase-info strong {
+  display: block;
+  font-size: 1.08rem;
+}
+
+.showcase-info span {
+  font-size: 0.84rem;
+  color: var(--bakery-muted);
+}
+
+/* 4. Pasos de uso */
+.steps-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bakery-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 2.5rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.step-num {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--bakery-gold);
+  background: rgba(243, 198, 119, 0.14);
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+}
+
+.step-item strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+.step-item p {
+  font-size: 0.84rem;
+  color: var(--bakery-muted);
+}
+
+/* 5. Área de Trabajo: Catálogo + Armador de Pedido */
+.main-workspace {
+  display: grid;
+  grid-template-columns: 1fr 390px;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+
+.section-kicker {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--bakery-gold);
+}
+
+.catalog-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-inline-badge {
+  font-size: 0.72rem;
+  vertical-align: middle;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(232, 74, 103, 0.2);
+  color: var(--bakery-gold);
+}
+
+.bakery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bakery-filter-btn {
+  padding: 0.48rem 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--bakery-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--bakery-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bakery-filter-btn.active,
+.bakery-filter-btn:hover {
+  background: var(--bakery-berry);
+  border-color: var(--bakery-berry);
+  color: #ffffff;
+}
+
+.bakery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.product-card {
+  background: var(--bakery-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-warm);
+}
+
+.product-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-emoji {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--bakery-surface-2);
+  border: 1px solid var(--border-warm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+}
+
+.product-demo-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bakery-gold);
+  background: rgba(243, 198, 119, 0.1);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+}
+
+.product-card h3 {
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+}
+
+.product-desc {
+  font-size: 0.88rem;
+  color: var(--bakery-muted);
+  flex: 1;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--bakery-soft);
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.product-price {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--bakery-gold);
+}
+
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bakery-surface);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.45rem;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bakery-surface-2);
+  color: var(--bakery-cream);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.qty-btn:hover {
+  background: var(--bakery-berry);
+}
+
+.qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.add-btn {
+  padding: 0.48rem 0.95rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--bakery-berry);
+  background: rgba(232, 74, 103, 0.16);
+  color: var(--bakery-cream);
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: var(--bakery-berry);
+}
+
+/* 6. Panel de Preparación de Pedido (.order-panel) */
+.order-panel {
+  position: sticky;
+  top: 4.8rem;
+  background: var(--bakery-surface);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-panel-header h2 {
+  font-size: 1.2rem;
+}
+
+.order-demo-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--bakery-gold);
+  background: rgba(243, 198, 119, 0.14);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+.empty-order {
+  font-size: 0.86rem;
+  color: var(--bakery-muted);
+  padding: 0.9rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.order-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--bakery-card);
+  border-radius: var(--radius-sm);
+}
+
+.order-line-info strong {
+  display: block;
+}
+
+.order-line-info small {
+  color: var(--bakery-muted);
+}
+
+.order-totals {
+  padding-block: 0.75rem;
+  border-block: 1px solid var(--border-subtle);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.total-row strong {
+  font-size: 1.3rem;
+  color: var(--bakery-gold);
+}
+
+.order-totals small {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--bakery-soft);
+  margin-top: 0.25rem;
+}
+
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.order-form label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--bakery-muted);
+}
+
+.order-form input,
+.order-form select,
+.order-form textarea {
+  width: 100%;
+  padding: 0.62rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--bakery-bg);
+  border: 1px solid var(--border-subtle);
+  color: var(--bakery-cream);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.message-preview-box {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem;
+}
+
+.preview-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--bakery-gold);
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.whatsapp-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--bakery-muted);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.order-actions {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 0.55rem;
+  margin-top: 0.3rem;
+}
+
+.btn-whatsapp {
+  background: #1fa855;
+  color: #ffffff;
+}
+
+.btn-copy {
+  background: var(--bakery-surface-2);
+  border-color: var(--border-warm);
+  color: var(--bakery-cream);
+}
+
+.order-feedback {
+  font-size: 0.82rem;
+  min-height: 1.2rem;
+  color: var(--bakery-gold);
+}
+
+/* 7. Barra móvil y Footer */
+.mobile-order-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  background: var(--bakery-surface);
+  border-top: 1px solid var(--bakery-gold);
+  padding: 0.75rem 1.25rem;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.bakery-footer {
+  margin-top: auto;
+  background: var(--kazvora-bg);
+  border-top: 1px solid var(--border-subtle);
+  padding-block: 2.5rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.footer-brand-info p {
+  font-size: 0.88rem;
+  color: #a2adb9;
+  margin-top: 0.45rem;
+}
+
+.footer-kazvora-card {
+  background: #12161c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.kazvora-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.kazvora-footer-logo img {
+  border-radius: 8px;
+}
+
+.kazvora-footer-logo strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #f4f7fb;
+}
+
+.kazvora-footer-logo small {
+  font-size: 0.75rem;
+  color: var(--kazvora-blue);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  font-size: 0.84rem;
+}
+
+.footer-links a {
+  color: var(--kazvora-blue);
+  font-weight: 600;
+}
+
+/* 8. Adaptación Móvil */
+@media (max-width: 960px) {
+  .bakery-hero,
+  .main-workspace,
+  .footer-grid,
+  .steps-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .order-panel {
+    position: static;
+  }
+
+  .mobile-order-bar:not([hidden]) {
+    display: flex;
+  }
+
+  body {
+    padding-bottom: 4.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .demo-disclaimer {
+    display: none;
+  }
+
+  .hero-metrics,
+  .form-row-two,
+  .order-actions {
+    grid-template-columns: 1fr;
+  }
+}

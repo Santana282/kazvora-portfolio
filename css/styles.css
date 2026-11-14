@@ -144,7 +144,7 @@ ul {
 .blue-text { color: var(--accent-blue); }
 .pink-text { color: var(--accent-pink); }
 
-/* 3. Encabezado y Navegación (.site-header) */
+/* 3. Encabezado, Logotipo Oficial (favicon.svg) y Navegación (.site-header) */
 .site-header {
   position: sticky;
   top: 0;
@@ -165,23 +165,29 @@ ul {
   gap: 0.75rem;
 }
 
+/* Renderiza el isotipo geométrico oficial assets/icons/favicon.svg en toda la web */
 .brand-mark {
   width: 40px;
   height: 40px;
-  border-radius: 11px;
-  background: linear-gradient(145deg, rgba(255, 69, 79, 0.18), rgba(131, 221, 255, 0.14));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background-color: #0b0d10;
+  background-image: url("../assets/icons/favicon.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
-  font-size: 1.08rem;
-  letter-spacing: -0.04em;
-  color: var(--accent-red);
+  color: transparent;
+  font-size: 0;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .brand-mark span {
-  color: var(--accent-blue);
+  color: transparent;
+  font-size: 0;
 }
 
 .brand-copy {
@@ -401,31 +407,26 @@ ul {
 .monogram {
   position: relative;
   z-index: 2;
+  width: 118px;
+  height: 118px;
+  border-radius: 26px;
+  background-color: #0b0d10;
+  background-image: url("../assets/icons/favicon.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 86%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 4rem;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-}
-
-.monogram span:first-child {
-  color: var(--accent-red);
-}
-
-.monogram span:last-child {
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-pink));
-  -webkit-background-clip: text;
-  background-clip: text;
+  justify-content: center;
   color: transparent;
+  font-size: 0;
 }
 
+.monogram span,
 .monogram i {
-  width: 4px;
-  height: 48px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, var(--accent-red), var(--accent-blue), var(--accent-pink));
-  transform: rotate(18deg);
+  display: none;
 }
 
 .art-caption {

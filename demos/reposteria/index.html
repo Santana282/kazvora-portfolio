@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1215">
+  <meta name="description" content="Demostración comercial de catálogo digital y preparación de pedidos para repostería, desarrollada por KAZVORA Technologies.">
+  <title>Dulce Atelier — Repostería Artesanal | Demo KAZVORA Technologies</title>
+  <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../assets/icons/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
+
+  <!-- Barra institucional de KAZVORA Technologies (con favicon.svg oficial) -->
+  <div class="kazvora-demo-bar" role="region" aria-label="Aviso de demostración comercial">
+    <div class="demo-bar-inner">
+      <a class="kazvora-badge" href="../../index.html" aria-label="Volver a KAZVORA Technologies">
+        <img src="../../assets/icons/favicon.svg" alt="" width="24" height="24">
+        <span><strong>KAZVORA</strong> TECHNOLOGIES · DEMO COMERCIAL</span>
+      </a>
+      <p class="demo-disclaimer">
+        Catálogo demostrativo con productos ficticios. No realiza cobros ni pedidos reales.
+      </p>
+      <div class="demo-bar-links">
+        <a href="../../portafolio.html">← Volver al portafolio</a>
+        <a class="demo-cta-quote" href="../../contacto.html">Cotizar un catálogo así ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encabezado propio de la marca demostrativa (Dulce Atelier) -->
+  <header class="bakery-header">
+    <div class="bakery-wrap header-row">
+      <div class="bakery-brand">
+        <span class="bakery-emblem" aria-hidden="true">✦</span>
+        <div>
+          <strong>Dulce Atelier</strong>
+          <small>ALTA REPOSTERÍA &amp; PASTELES DE AUTOR</small>
+        </div>
+      </div>
+      <nav class="bakery-nav" aria-label="Secciones de la demostración">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#como-funciona">Cómo pedir</a>
+        <a href="#armar-pedido" class="order-pill-btn">
+          Mi pedido (<span id="header-item-count">0</span>)
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero de la Repostería -->
+    <section class="bakery-hero bakery-wrap">
+      <div class="hero-content">
+        <span class="demo-tag">PROYECTO DE DEMOSTRACIÓN · SECTOR GASTRONÓMICO</span>
+        <h1>Pasteles artesanales diseñados para <span class="highlight-berry">celebrar momentos.</span></h1>
+        <p>
+          Explora nuestra vitrina digital, selecciona tus postres favoritos, personaliza la dedicatoria y genera tu solicitud de pedido lista para enviar por WhatsApp en segundos.
+        </p>
+        <div class="hero-buttons">
+          <a class="btn-bakery btn-bakery-primary" href="#catalogo">Explorar vitrina ↓</a>
+          <a class="btn-bakery btn-bakery-outline" href="#armar-pedido">Ver resumen de pedido</a>
+        </div>
+        <div class="hero-metrics">
+          <div><strong>Horneado fresco</strong><span>Bajo pedido con 24-48 h</span></div>
+          <div><strong>Atención directa</strong><span>Confirmación vía WhatsApp</span></div>
+          <div><strong>100% Adaptable</strong><span>Móvil, tablet y escritorio</span></div>
+        </div>
+      </div>
+
+      <div class="hero-showcase" aria-hidden="true">
+        <div class="showcase-card">
+          <div class="showcase-badge">Especialidad de muestra</div>
+          <div class="cake-illustration">
+            <div class="cake-top-berries"><span></span><span></span><span></span></div>
+            <div class="cake-layer layer-top"></div>
+            <div class="cake-Middle-cream"></div>
+            <div class="cake-layer layer-bottom"></div>
+            <div class="cake-plate"></div>
+          </div>
+          <div class="showcase-info">
+            <strong>Red Velvet Imperial &amp; Frutos Rojos</strong>
+            <span>10–12 porciones · Producto ficticio de prueba</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cómo funciona -->
+    <section id="como-funciona" class="bakery-wrap steps-strip" aria-label="Pasos para preparar un pedido">
+      <div class="step-item">
+        <span class="step-num">01</span>
+        <div>
+          <strong>Elige del catálogo</strong>
+          <p>Filtra por categoría y agrega los pasteles o postres que desees probar en la demostración.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="step-num">02</span>
+        <div>
+          <strong>Personaliza tu entrega</strong>
+          <p>Indica tu nombre, fecha tentativa, modalidad de entrega y dedicatoria opcional.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <span class="step-num">03</span>
+        <div>
+          <strong>Envía o copia para WhatsApp</strong>
+          <p>El sistema estructura el resumen automáticamente con cantidades y total estimado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catálogo y Armador de Pedido -->
+    <section id="catalogo" class="bakery-wrap main-workspace">
+      <div class="catalog-column">
+        <div class="catalog-header">
+          <div>
+            <p class="section-kicker">VITRINA INTERACTIVA</p>
+            <h2>Catálogo de productos <span class="demo-inline-badge">DEMO</span></h2>
+          </div>
+          <div id="bakery-filters" class="bakery-filters" role="group" aria-label="Filtrar productos por categoría"></div>
+        </div>
+
+        <div id="bakery-grid" class="bakery-grid" aria-live="polite"></div>
+      </div>
+
+      <!-- Panel lateral / inferior de preparación de pedido -->
+      <aside id="armar-pedido" class="order-panel" aria-label="Preparador de pedido">
+        <div class="order-panel-header">
+          <h2>Tu solicitud de pedido</h2>
+          <span class="order-demo-pill">Sin cobro real</span>
+        </div>
+
+        <div id="order-items-list" class="order-items-list" aria-live="polite"></div>
+
+        <div class="order-totals">
+          <div class="total-row">
+            <span>Total estimado (MXN · Demo)</span>
+            <strong id="order-total-amount">$0</strong>
+          </div>
+          <small>Los precios son demostrativos para ilustrar el cálculo automático del catálogo.</small>
+        </div>
+
+        <form id="bakery-order-form" class="order-form">
+          <label for="customer-name">Tu nombre *</label>
+          <input id="customer-name" name="customer-name" type="text" required placeholder="Ej. Sofía Hernández">
+
+          <div class="form-row-two">
+            <div>
+              <label for="delivery-mode">Modalidad</label>
+              <select id="delivery-mode" name="delivery-mode">
+                <option value="Recoger en sucursal">Recoger en sucursal</option>
+                <option value="Entrega a domicilio (a cotizar)">Entrega a domicilio</option>
+              </select>
+            </div>
+            <div>
+              <label for="delivery-date">Fecha deseada</label>
+              <input id="delivery-date" name="delivery-date" type="date">
+            </div>
+          </div>
+
+          <label for="cake-notes">Dedicatoria o notas especiales (opcional)</label>
+          <textarea id="cake-notes" name="cake-notes" rows="2" placeholder="Ej. «Feliz cumpleaños Mamá», sin nuez..."></textarea>
+
+          <div class="message-preview-box">
+            <span class="preview-label">Vista previa del mensaje para WhatsApp:</span>
+            <pre id="whatsapp-preview" class="whatsapp-preview"></pre>
+          </div>
+
+          <div class="order-actions">
+            <button type="submit" class="btn-bakery btn-whatsapp">
+              Preparar para WhatsApp <span>↗</span>
+            </button>
+            <button type="button" id="copy-order-btn" class="btn-bakery btn-copy">
+              Copiar resumen
+            </button>
+          </div>
+
+          <p id="order-feedback" class="order-feedback" aria-live="polite"></p>
+        </form>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Barra móvil flotante para ir al pedido rápidamente -->
+  <div id="mobile-order-bar" class="mobile-order-bar" hidden>
+    <div>
+      <strong id="mobile-bar-count">0 productos</strong>
+      <span id="mobile-bar-total">$0 MXN</span>
+    </div>
+    <a href="#armar-pedido" class="btn-bakery btn-bakery-primary">Revisar pedido ↓</a>
+  </div>
+
+  <!-- Pie de página con atribución y favicon.svg de KAZVORA Technologies -->
+  <footer class="bakery-footer">
+    <div class="bakery-wrap footer-grid">
+      <div class="footer-brand-info">
+        <strong>Dulce Atelier · Proyecto Demostrativo</strong>
+        <p>
+          Esta interfaz es una demostración técnica y comercial desarrollada por <strong>KAZVORA Technologies</strong> para exhibir cómo una pastelería, cafetería o comercio local puede digitalizar su catálogo y recibir pedidos estructurados por WhatsApp.
+        </p>
+      </div>
+      <div class="footer-kazvora-card">
+        <div class="kazvora-footer-logo">
+          <img src="../../assets/icons/favicon.svg" alt="Logotipo KAZVORA Technologies" width="34" height="34">
+          <div>
+            <strong>KAZVORA TECHNOLOGIES</strong>
+            <small>Tecnología que convierte ideas en soluciones</small>
+          </div>
+        </div>
+        <div class="footer-links">
+          <a href="../../index.html">Inicio corporativo</a>
+          <a href="../../portafolio.html">Portafolio</a>
+          <a href="../../servicios.html">Servicios</a>
+          <a href="../../contacto.html">Solicitar cotización ↗</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
