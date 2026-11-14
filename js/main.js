@@ -1,20 +1,30 @@
 /**
  * KAZVORA Technologies — Controlador Principal (js/main.js)
- * Módulos:
- * 1. Año automático en footer (#year)
- * 2. Navegación móvil accesible (.menu-toggle + #main-nav)
- * 3. Renderizado de proyectos destacados (#featured-projects) y catálogo (#all-projects)
- * 4. Filtros dinámicos por categoría (#project-filters)
- * 5. Gestión del formulario de contacto (#contact-form + #form-feedback)
+ * Intervención Técnica Fase 4:
+ * - MAIN-001: Política positiva de validación de URLs (HTTP, HTTPS y rutas relativas válidas)
+ * - MAIN-002: Límites de longitud y validación de campos en el formulario sin pérdida de datos
+ * - MAIN-003: Manejo transparente de WhatsApp, detección de bloqueo de popups y copia de respaldo
+ * - PROJECTS-002: Respaldo de validación de esquema al consumir window.KAZVORA_PROJECTS
  */
 (function () {
   "use strict";
 
   const KAZVORA_CONFIG = {
-    // Coloca aquí el número con código de país (ej. "522721234567") cuando esté activo.
-    // Mientras permanezca vacío "", el sistema opera en modo seguro copiando el mensaje.
+    // Número internacional E.164 (ej. "522721234567").
+    // Se conserva vacío "" hasta que el fundador autorice el número comercial definitivo.
     whatsappNumber: ""
   };
+
+  const FORM_LIMITS = {
+    NAME_MIN: 2,
+    NAME_MAX: 80,
+    EMAIL_MAX: 120,
+    TYPE_MAX: 60,
+    MESSAGE_MIN: 10,
+    MESSAGE_MAX: 1000
+  };
+
+  const ALLOWED_CATEGORIES = ["Web", "Catálogo digital", "Datos y software"];
 
   /**
    * Sanitiza cadenas de texto para evitar inyección de HTML (XSS)
@@ -29,6 +39,130 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  /**
+   * MAIN-001: Valida positivamente una URL permitiendo solo HTTP, HTTPS o rutas relativas válidas.
+   * Rechaza javascript:, data:, vbscript:, protocolos desconocidos, URLs protocol-relative (//)
+   * y caracteres peligrosos para atributos HTML.
+   * @param {string} rawUrl
+   * @returns {string|null} URL válida o null si debe rechazarse
+   */
+  function validateSafeUrl(rawUrl) {
+    if (window.KAZVORA_SCHEMA && typeof window.KAZVORA_SCHEMA.validateProjectUrl === "function") {
+      return window.KAZVORA_SCHEMA.validateProjectUrl(rawUrl);
+    }
+
+    if (typeof rawUrl !== "string") return null;
+    const trimmed = rawUrl.trim();
+    if (trimmed === "") return "";
+
+    if (/[\u0000-\u001F\u007F\s"'<>`]/.test(trimmed)) {
+      return null;
+    }
+
+    if (trimmed.startsWith("//") || trimmed.startsWith("\\\\") || trimmed.includes("\\")) {
+      return null;
+    }
+
+    const schemeMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (schemeMatch) {
+      const scheme = schemeMatch[1].toLowerCase();
+      if (scheme !== "http" && scheme !== "https") {
+        return null;
+      }
+      try {
+        const parsed = new URL(trimmed);
+        if ((parsed.protocol !== "http:" && parsed.protocol !== "https:") || !parsed.hostname) {
+          return null;
+        }
+        return trimmed;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    if (trimmed.includes(":")) {
+      return null;
+    }
+
+    const relativePattern =
+      /^(?:\.\/)?[a-zA-Z0-9._-]+(?:\/[a-zA-Z0-9._-]+)*(?:\?[a-zA-Z0-9=&._-]+)?(?:#[a-zA-Z0-9._-]+)?$/;
+    if (!relativePattern.test(trimmed) || trimmed.includes("..")) {
+      return null;
+    }
+
+    return trimmed;
+  }
+
+  /**
+   * Valida formato telefónico internacional E.164 para WhatsApp (11 a 15 dígitos con prefijo de país)
+   * @param {string} rawPhone
+   * @returns {string|null} Número de solo dígitos o null si no es válido
+   */
+  function validateWhatsAppPhone(rawPhone) {
+    if (typeof rawPhone !== "string") return null;
+    const trimmed = rawPhone.trim();
+    if (!trimmed) return null;
+
+    // Solo permitir dígitos, espacios, guiones y un signo '+' inicial opcional
+    if (!/^\+?[0-9\s-]+$/.test(trimmed)) {
+      return null;
+    }
+
+    const digits = trimmed.replace(/[\s+-]/g, "");
+    // Formato internacional E.164: no inicia con 0, requiere código de país + número (11 a 15 dígitos)
+    if (!/^[1-9]\d{10,14}$/.test(digits)) {
+      return null;
+    }
+
+    return digits;
+  }
+
+  /**
+   * Valida correo electrónico opcional con límite de longitud
+   * @param {string} email
+   * @returns {boolean}
+   */
+  function isValidOptionalEmail(email) {
+    if (!email) return true;
+    if (email.length > FORM_LIMITS.EMAIL_MAX) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  }
+
+  /**
+   * PROJECTS-002: Obtiene y valida defensivamente la lista de proyectos
+   * @returns {Array}
+   */
+  function getValidatedProjects() {
+    const raw = window.KAZVORA_PROJECTS;
+    if (
+      window.KAZVORA_SCHEMA &&
+      typeof window.KAZVORA_SCHEMA.validateKazvoraProjects === "function"
+    ) {
+      return window.KAZVORA_SCHEMA.validateKazvoraProjects(raw);
+    }
+
+    if (!Array.isArray(raw)) return [];
+    const seenIds = new Set();
+
+    return raw.filter(function (item) {
+      if (!item || typeof item !== "object") return false;
+      const id = typeof item.id === "string" ? item.id.trim() : "";
+      const title = typeof item.title === "string" ? item.title.trim() : "";
+      const desc = typeof item.description === "string" ? item.description.trim() : "";
+      const cat = typeof item.category === "string" ? item.category.trim() : "";
+
+      if (!id || seenIds.has(id) || !title || !desc) return false;
+      if (!ALLOWED_CATEGORIES.includes(cat)) return false;
+      if (typeof item.featured !== "boolean") return false;
+
+      const checkUrl = validateSafeUrl(item.url === undefined ? "" : item.url);
+      if (checkUrl === null) return false;
+
+      seenIds.add(id);
+      return true;
+    });
   }
 
   /**
@@ -64,7 +198,6 @@
       mainNav.classList.toggle("is-open", nextState);
     });
 
-    // Cerrar al presionar Escape
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && mainNav.classList.contains("is-open")) {
         closeMenu();
@@ -72,7 +205,6 @@
       }
     });
 
-    // Cerrar al hacer clic en un enlace dentro de vista móvil
     mainNav.querySelectorAll("a").forEach(function (link) {
       link.addEventListener("click", function () {
         if (window.innerWidth <= 768) {
@@ -83,7 +215,7 @@
   }
 
   /**
-   * 3. Construye el HTML seguro de una tarjeta de proyecto
+   * 3. Construye el HTML seguro de una tarjeta de proyecto (MAIN-001)
    * @param {Object} project
    * @returns {string}
    */
@@ -94,7 +226,8 @@
     const status = escapeHTML(project.status || "Demostración");
     const description = escapeHTML(project.description || "");
     const icon = escapeHTML(project.icon || "↗");
-    const rawUrl = typeof project.url === "string" ? project.url.trim() : "";
+
+    const validatedUrl = validateSafeUrl(project.url === undefined ? "" : project.url);
 
     const techList = Array.isArray(project.technologies)
       ? project.technologies
@@ -105,12 +238,12 @@
       : "";
 
     let actionHTML = '<span class="project-status-note">En preparación · Próximamente</span>';
-    if (rawUrl && !/^javascript:/i.test(rawUrl)) {
-      const isExternal = /^https?:\/\//i.test(rawUrl);
+    if (validatedUrl) {
+      const isExternal = /^https?:\/\//i.test(validatedUrl);
       const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
       actionHTML =
         '<a class="text-link project-link" href="' +
-        escapeHTML(rawUrl) +
+        escapeHTML(validatedUrl) +
         '"' +
         targetAttr +
         '>Explorar proyecto <span aria-hidden="true">↗</span></a>';
@@ -143,12 +276,11 @@
 
     if (!featuredContainer && !allContainer) return;
 
-    const projects = Array.isArray(window.KAZVORA_PROJECTS) ? window.KAZVORA_PROJECTS : [];
+    const projects = getValidatedProjects();
 
-    // Renderizar destacados en index.html
     if (featuredContainer) {
       const featuredList = projects.filter(function (item) {
-        return Boolean(item && item.featured);
+        return item.featured === true;
       });
 
       if (featuredList.length === 0) {
@@ -159,14 +291,13 @@
       }
     }
 
-    // Renderizar todos los proyectos y filtros en portafolio.html
     if (allContainer) {
       function renderFilteredProjects(selectedCategory) {
         const filtered =
           selectedCategory === "Todos"
             ? projects
             : projects.filter(function (item) {
-                return item && item.category === selectedCategory;
+                return item.category === selectedCategory;
               });
 
         if (filtered.length === 0) {
@@ -181,7 +312,7 @@
       if (filtersContainer) {
         const uniqueCategories = ["Todos"];
         projects.forEach(function (item) {
-          if (item && item.category && !uniqueCategories.includes(item.category)) {
+          if (item.category && !uniqueCategories.includes(item.category)) {
             uniqueCategories.push(item.category);
           }
         });
@@ -225,13 +356,36 @@
   }
 
   /**
-   * 5. Gestiona el formulario de contacto (preparación, copiado y WhatsApp opcional)
+   * Copia texto al portapapeles devolviendo una promesa booleana
+   * @param {string} text
+   * @returns {Promise<boolean>}
+   */
+  function copyToClipboardSafe(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      return navigator.clipboard
+        .writeText(text)
+        .then(function () {
+          return true;
+        })
+        .catch(function () {
+          return false;
+        });
+    }
+    return Promise.resolve(false);
+  }
+
+  /**
+   * 5. Gestiona el formulario de contacto con límites de longitud y manejo realista de WhatsApp
+   * (MAIN-002 y MAIN-003)
    */
   function initContactForm() {
     const form = document.getElementById("contact-form");
     const feedback = document.getElementById("form-feedback");
 
     if (!form || !feedback) return;
+
+    // Desactivar validación nativa silenciosa para mostrar mensajes claros en #form-feedback
+    form.setAttribute("novalidate", "novalidate");
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -246,9 +400,60 @@
       const projectType = typeInput ? typeInput.value.trim() : "Proyecto general";
       const message = messageInput ? messageInput.value.trim() : "";
 
-      if (!name || !message) {
-        feedback.textContent = "Por favor, completa tu nombre y los detalles de tu idea.";
+      // Validaciones de presencia y límites de longitud (MAIN-002) sin borrar los datos del usuario
+      if (!name) {
+        feedback.textContent = "Por favor, escribe tu nombre para poder dirigirnos a ti.";
         feedback.className = "form-feedback is-error";
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      if (name.length < FORM_LIMITS.NAME_MIN || name.length > FORM_LIMITS.NAME_MAX) {
+        feedback.textContent =
+          "El nombre debe tener entre " +
+          FORM_LIMITS.NAME_MIN +
+          " y " +
+          FORM_LIMITS.NAME_MAX +
+          " caracteres.";
+        feedback.className = "form-feedback is-error";
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      if (!isValidOptionalEmail(email)) {
+        feedback.textContent =
+          "Ingresa un correo electrónico válido (máximo " +
+          FORM_LIMITS.EMAIL_MAX +
+          " caracteres) o déjalo vacío.";
+        feedback.className = "form-feedback is-error";
+        if (emailInput) emailInput.focus();
+        return;
+      }
+
+      if (projectType.length > FORM_LIMITS.TYPE_MAX) {
+        feedback.textContent = "El tipo de proyecto seleccionado excede la longitud permitida.";
+        feedback.className = "form-feedback is-error";
+        return;
+      }
+
+      if (!message) {
+        feedback.textContent = "Por favor, describe brevemente qué necesitas resolver.";
+        feedback.className = "form-feedback is-error";
+        if (messageInput) messageInput.focus();
+        return;
+      }
+
+      if (message.length < FORM_LIMITS.MESSAGE_MIN || message.length > FORM_LIMITS.MESSAGE_MAX) {
+        feedback.textContent =
+          "La descripción de tu idea debe tener entre " +
+          FORM_LIMITS.MESSAGE_MIN +
+          " y " +
+          FORM_LIMITS.MESSAGE_MAX +
+          " caracteres (actual: " +
+          message.length +
+          ").";
+        feedback.className = "form-feedback is-error";
+        if (messageInput) messageInput.focus();
         return;
       }
 
@@ -265,40 +470,62 @@
       });
 
       const preparedText = lines.join("\n");
-      const cleanPhone = KAZVORA_CONFIG.whatsappNumber.replace(/\D/g, "");
+      const validPhone = validateWhatsAppPhone(KAZVORA_CONFIG.whatsappNumber);
 
-      // Si hay número comercial configurado, abre WhatsApp directamente
-      if (cleanPhone.length >= 10) {
-        const waUrl =
-          "https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(preparedText);
-        window.open(waUrl, "_blank", "noopener,noreferrer");
-        feedback.textContent =
-          "¡Mensaje preparado! Se abrió WhatsApp en una nueva pestaña para enviarlo.";
-        feedback.className = "form-feedback is-success";
+      // MAIN-003: Si existe un número internacional válido, intentar abrir WhatsApp verificando bloqueo de popups
+      if (validPhone) {
+        const waUrl = "https://wa.me/" + validPhone + "?text=" + encodeURIComponent(preparedText);
+        let popupWindow = null;
+        try {
+          popupWindow = window.open(waUrl, "_blank");
+          if (popupWindow) {
+            popupWindow.opener = null;
+          }
+        } catch (err) {
+          popupWindow = null;
+        }
+
+        copyToClipboardSafe(preparedText).then(function (copied) {
+          if (popupWindow) {
+            feedback.textContent =
+              "Mensaje preparado. Se solicitó abrir WhatsApp en una nueva pestaña (recuerda pulsar Enviar dentro de WhatsApp para completar el envío)." +
+              (copied ? " También copiamos una copia de respaldo en tu portapapeles." : "");
+            feedback.className = "form-feedback is-success";
+          } else {
+            feedback.textContent =
+              "Tu navegador bloqueó la ventana emergente de WhatsApp. " +
+              (copied
+                ? "Copiamos tu mensaje al portapapeles para que puedas pegarlo manualmente."
+                : "Permite ventanas emergentes para este sitio o copia este texto: " + preparedText);
+            feedback.className = "form-feedback is-error";
+          }
+        });
         return;
       }
 
-      // Modo actual: copia el mensaje al portapapeles y lo deja listo
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-        navigator.clipboard
-          .writeText(preparedText)
-          .then(function () {
-            feedback.textContent =
-              "✓ Mensaje preparado y copiado al portapapeles. Ya puedes pegarlo en tu canal de contacto.";
-            feedback.className = "form-feedback is-success";
-          })
-          .catch(function () {
-            feedback.textContent = "Mensaje preparado: " + preparedText;
-            feedback.className = "form-feedback is-success";
-          });
-      } else {
-        feedback.textContent = "Mensaje preparado: " + preparedText;
-        feedback.className = "form-feedback is-success";
-      }
+      // Modo estándar mientras el número de WhatsApp está pendiente de configuración
+      copyToClipboardSafe(preparedText).then(function (copied) {
+        if (copied) {
+          feedback.textContent =
+            "✓ Mensaje preparado y copiado al portapapeles. El envío directo por WhatsApp aún no está activo; pega este mensaje en tu canal de contacto.";
+          feedback.className = "form-feedback is-success";
+        } else {
+          feedback.textContent =
+            "Mensaje preparado (selecciónalo y cópialo manualmente): " + preparedText;
+          feedback.className = "form-feedback is-success";
+        }
+      });
     });
   }
 
-  // Inicialización ordenada al cargar el DOM
+  // Exponer funciones clave para auditoría y pruebas de regresión
+  window.KAZVORA_MAIN_UTILS = {
+    validateSafeUrl: validateSafeUrl,
+    validateWhatsAppPhone: validateWhatsAppPhone,
+    isValidOptionalEmail: isValidOptionalEmail,
+    FORM_LIMITS: Object.assign({}, FORM_LIMITS)
+  };
+
   document.addEventListener("DOMContentLoaded", function () {
     initFooterYear();
     initMobileMenu();

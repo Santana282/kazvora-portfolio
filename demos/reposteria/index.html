@@ -140,14 +140,14 @@
         <div class="order-totals">
           <div class="total-row">
             <span>Total estimado (MXN · Demo)</span>
-            <strong id="order-total-amount">$0</strong>
+            <strong id="order-total-amount">$0 MXN</strong>
           </div>
           <small>Los precios son demostrativos para ilustrar el cálculo automático del catálogo.</small>
         </div>
 
-        <form id="bakery-order-form" class="order-form">
+        <form id="bakery-order-form" class="order-form" novalidate>
           <label for="customer-name">Tu nombre *</label>
-          <input id="customer-name" name="customer-name" type="text" required placeholder="Ej. Sofía Hernández">
+          <input id="customer-name" name="customer-name" type="text" minlength="2" maxlength="80" required placeholder="Ej. Sofía Hernández">
 
           <div class="form-row-two">
             <div>
@@ -164,7 +164,7 @@
           </div>
 
           <label for="cake-notes">Dedicatoria o notas especiales (opcional)</label>
-          <textarea id="cake-notes" name="cake-notes" rows="2" placeholder="Ej. «Feliz cumpleaños Mamá», sin nuez..."></textarea>
+          <textarea id="cake-notes" name="cake-notes" rows="2" maxlength="300" placeholder="Ej. «Feliz cumpleaños Mamá», sin nuez..."></textarea>
 
           <div class="message-preview-box">
             <span class="preview-label">Vista previa del mensaje para WhatsApp:</span>
