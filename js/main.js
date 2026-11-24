@@ -1,18 +1,28 @@
 /**
- * KAZVORA Technologies — Controlador Principal (js/main.js)
- * Intervención Técnica Fase 4:
- * - MAIN-001: Política positiva de validación de URLs (HTTP, HTTPS y rutas relativas válidas)
- * - MAIN-002: Límites de longitud y validación de campos en el formulario sin pérdida de datos
- * - MAIN-003: Manejo transparente de WhatsApp, detección de bloqueo de popups y copia de respaldo
- * - PROJECTS-002: Respaldo de validación de esquema al consumir window.KAZVORA_PROJECTS
+ * KAZVORA Technologies — Controlador Principal Seguro v2.1 (js/main.js)
+ * - Construcción 100 % nativa del DOM (sin innerHTML: mitigación estructural contra XSS)
+ * - Validación positiva de URLs (HTTP, HTTPS y rutas relativas limpias)
+ * - Menú móvil accesible con tecla Escape y sincronización aria-expanded
+ * - Portafolio destacado y filtrable con validación defensiva de esquema
+ * - Formulario de contacto con límites de longitud, honeypot, cooldown y respaldo de portapapeles
  */
 (function () {
   "use strict";
 
+  const ENV =
+    typeof window !== "undefined" &&
+    window.KAZVORA_ENV &&
+    typeof window.KAZVORA_ENV === "object"
+      ? window.KAZVORA_ENV
+      : {};
+
   const KAZVORA_CONFIG = {
-    // Número internacional E.164 (ej. "522721234567").
-    // Se conserva vacío "" hasta que el fundador autorice el número comercial definitivo.
-    whatsappNumber: ""
+    // Se conserva vacío "" hasta que se autorice el número comercial oficial (formato E.164).
+    whatsappNumber: typeof ENV.whatsappNumber === "string" ? ENV.whatsappNumber : "",
+    contactCooldownMs:
+      typeof ENV.contactCooldownMs === "number" && ENV.contactCooldownMs >= 0
+        ? ENV.contactCooldownMs
+        : 2500
   };
 
   const FORM_LIMITS = {
@@ -25,29 +35,21 @@
   };
 
   const ALLOWED_CATEGORIES = ["Web", "Catálogo digital", "Datos y software"];
+  const ALLOWED_THEMES = ["red", "blue", "pink"];
 
-  /**
-   * Sanitiza cadenas de texto para evitar inyección de HTML (XSS)
-   * @param {string} value
-   * @returns {string}
-   */
-  function escapeHTML(value) {
-    if (value === null || value === undefined) return "";
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  function clearContainer(container) {
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
   }
 
-  /**
-   * MAIN-001: Valida positivamente una URL permitiendo solo HTTP, HTTPS o rutas relativas válidas.
-   * Rechaza javascript:, data:, vbscript:, protocolos desconocidos, URLs protocol-relative (//)
-   * y caracteres peligrosos para atributos HTML.
-   * @param {string} rawUrl
-   * @returns {string|null} URL válida o null si debe rechazarse
-   */
+  function createEl(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined && text !== null) el.textContent = String(text);
+    return el;
+  }
+
   function validateSafeUrl(rawUrl) {
     if (window.KAZVORA_SCHEMA && typeof window.KAZVORA_SCHEMA.validateProjectUrl === "function") {
       return window.KAZVORA_SCHEMA.validateProjectUrl(rawUrl);
@@ -95,23 +97,16 @@
     return trimmed;
   }
 
-  /**
-   * Valida formato telefónico internacional E.164 para WhatsApp (11 a 15 dígitos con prefijo de país)
-   * @param {string} rawPhone
-   * @returns {string|null} Número de solo dígitos o null si no es válido
-   */
   function validateWhatsAppPhone(rawPhone) {
     if (typeof rawPhone !== "string") return null;
     const trimmed = rawPhone.trim();
     if (!trimmed) return null;
 
-    // Solo permitir dígitos, espacios, guiones y un signo '+' inicial opcional
     if (!/^\+?[0-9\s-]+$/.test(trimmed)) {
       return null;
     }
 
     const digits = trimmed.replace(/[\s+-]/g, "");
-    // Formato internacional E.164: no inicia con 0, requiere código de país + número (11 a 15 dígitos)
     if (!/^[1-9]\d{10,14}$/.test(digits)) {
       return null;
     }
@@ -119,21 +114,12 @@
     return digits;
   }
 
-  /**
-   * Valida correo electrónico opcional con límite de longitud
-   * @param {string} email
-   * @returns {boolean}
-   */
   function isValidOptionalEmail(email) {
     if (!email) return true;
     if (email.length > FORM_LIMITS.EMAIL_MAX) return false;
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   }
 
-  /**
-   * PROJECTS-002: Obtiene y valida defensivamente la lista de proyectos
-   * @returns {Array}
-   */
   function getValidatedProjects() {
     const raw = window.KAZVORA_PROJECTS;
     if (
@@ -165,9 +151,6 @@
     });
   }
 
-  /**
-   * 1. Actualiza automáticamente el año en el pie de página
-   */
   function initFooterYear() {
     const yearEl = document.getElementById("year");
     if (yearEl) {
@@ -175,9 +158,6 @@
     }
   }
 
-  /**
-   * 2. Gestiona la apertura/cierre accesible del menú móvil
-   */
   function initMobileMenu() {
     const toggleBtn = document.querySelector(".menu-toggle");
     const mainNav = document.getElementById("main-nav");
@@ -214,61 +194,59 @@
     });
   }
 
-  /**
-   * 3. Construye el HTML seguro de una tarjeta de proyecto (MAIN-001)
-   * @param {Object} project
-   * @returns {string}
-   */
-  function createProjectCardHTML(project) {
-    const theme = ["red", "blue", "pink"].includes(project.theme) ? project.theme : "blue";
-    const title = escapeHTML(project.title || "Proyecto KAZVORA");
-    const category = escapeHTML(project.category || "General");
-    const status = escapeHTML(project.status || "Demostración");
-    const description = escapeHTML(project.description || "");
-    const icon = escapeHTML(project.icon || "↗");
+  function createProjectCardElement(project) {
+    const theme = ALLOWED_THEMES.includes(project.theme) ? project.theme : "blue";
+    const article = createEl("article", "project-card theme-" + theme);
 
+    const top = createEl("div", "project-card-top");
+    const symbolBox = createEl("div", "project-symbol " + theme + "-symbol");
+    symbolBox.setAttribute("aria-hidden", "true");
+    symbolBox.appendChild(createEl("span", "", project.icon || "↗"));
+
+    const badges = createEl("div", "project-badges");
+    badges.appendChild(createEl("span", "project-category " + theme + "-text", project.category || "General"));
+    badges.appendChild(createEl("span", "project-badge", project.status || "Demostración"));
+
+    top.appendChild(symbolBox);
+    top.appendChild(badges);
+    article.appendChild(top);
+
+    article.appendChild(createEl("h3", "project-title", project.title || "Proyecto KAZVORA"));
+    article.appendChild(createEl("p", "project-description", project.description || ""));
+
+    const tagsWrap = createEl("div", "project-tags");
+    if (Array.isArray(project.technologies)) {
+      project.technologies.forEach(function (tech) {
+        if (typeof tech === "string" && tech.trim() !== "") {
+          tagsWrap.appendChild(createEl("span", "project-tag", tech.trim()));
+        }
+      });
+    }
+    article.appendChild(tagsWrap);
+
+    const footer = createEl("div", "project-footer");
     const validatedUrl = validateSafeUrl(project.url === undefined ? "" : project.url);
 
-    const techList = Array.isArray(project.technologies)
-      ? project.technologies
-          .map(function (tech) {
-            return '<span class="project-tag">' + escapeHTML(tech) + "</span>";
-          })
-          .join("")
-      : "";
-
-    let actionHTML = '<span class="project-status-note">En preparación · Próximamente</span>';
     if (validatedUrl) {
-      const isExternal = /^https?:\/\//i.test(validatedUrl);
-      const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
-      actionHTML =
-        '<a class="text-link project-link" href="' +
-        escapeHTML(validatedUrl) +
-        '"' +
-        targetAttr +
-        '>Explorar proyecto <span aria-hidden="true">↗</span></a>';
+      const link = createEl("a", "text-link project-link");
+      link.setAttribute("href", validatedUrl);
+      if (/^https?:\/\//i.test(validatedUrl)) {
+        link.setAttribute("target", "_blank");
+        link.setAttribute("rel", "noopener noreferrer");
+      }
+      link.appendChild(document.createTextNode("Explorar proyecto "));
+      const arrow = createEl("span", "", "↗");
+      arrow.setAttribute("aria-hidden", "true");
+      link.appendChild(arrow);
+      footer.appendChild(link);
+    } else {
+      footer.appendChild(createEl("span", "project-status-note", "En preparación · Próximamente"));
     }
 
-    return (
-      '<article class="project-card theme-' + theme + '">' +
-        '<div class="project-card-top">' +
-          '<div class="project-symbol ' + theme + '-symbol" aria-hidden="true"><span>' + icon + "</span></div>" +
-          '<div class="project-badges">' +
-            '<span class="project-category ' + theme + '-text">' + category + "</span>" +
-            '<span class="project-badge">' + status + "</span>" +
-          "</div>" +
-        "</div>" +
-        '<h3 class="project-title">' + title + "</h3>" +
-        '<p class="project-description">' + description + "</p>" +
-        '<div class="project-tags">' + techList + "</div>" +
-        '<div class="project-footer">' + actionHTML + "</div>" +
-      "</article>"
-    );
+    article.appendChild(footer);
+    return article;
   }
 
-  /**
-   * 4. Inicializa proyectos destacados en portada y catálogo filtrable en portafolio
-   */
   function initPortfolio() {
     const featuredContainer = document.getElementById("featured-projects");
     const allContainer = document.getElementById("all-projects");
@@ -279,20 +257,25 @@
     const projects = getValidatedProjects();
 
     if (featuredContainer) {
+      clearContainer(featuredContainer);
       const featuredList = projects.filter(function (item) {
         return item.featured === true;
       });
 
       if (featuredList.length === 0) {
-        featuredContainer.innerHTML =
-          '<p class="empty-state">Nuevos proyectos destacados en preparación.</p>';
+        featuredContainer.appendChild(
+          createEl("p", "empty-state", "Nuevos proyectos destacados en preparación.")
+        );
       } else {
-        featuredContainer.innerHTML = featuredList.map(createProjectCardHTML).join("");
+        featuredList.forEach(function (item) {
+          featuredContainer.appendChild(createProjectCardElement(item));
+        });
       }
     }
 
     if (allContainer) {
       function renderFilteredProjects(selectedCategory) {
+        clearContainer(allContainer);
         const filtered =
           selectedCategory === "Todos"
             ? projects
@@ -301,15 +284,19 @@
               });
 
         if (filtered.length === 0) {
-          allContainer.innerHTML =
-            '<p class="empty-state">No hay proyectos registrados en esta categoría todavía.</p>';
+          allContainer.appendChild(
+            createEl("p", "empty-state", "No hay proyectos registrados en esta categoría todavía.")
+          );
           return;
         }
 
-        allContainer.innerHTML = filtered.map(createProjectCardHTML).join("");
+        filtered.forEach(function (item) {
+          allContainer.appendChild(createProjectCardElement(item));
+        });
       }
 
       if (filtersContainer) {
+        clearContainer(filtersContainer);
         const uniqueCategories = ["Todos"];
         projects.forEach(function (item) {
           if (item.category && !uniqueCategories.includes(item.category)) {
@@ -317,23 +304,13 @@
           }
         });
 
-        filtersContainer.innerHTML = uniqueCategories
-          .map(function (cat, idx) {
-            const activeClass = idx === 0 ? " active" : "";
-            const ariaPressed = idx === 0 ? "true" : "false";
-            return (
-              '<button type="button" class="filter-btn' +
-              activeClass +
-              '" data-category="' +
-              escapeHTML(cat) +
-              '" aria-pressed="' +
-              ariaPressed +
-              '">' +
-              escapeHTML(cat) +
-              "</button>"
-            );
-          })
-          .join("");
+        uniqueCategories.forEach(function (cat, idx) {
+          const btn = createEl("button", idx === 0 ? "filter-btn active" : "filter-btn", cat);
+          btn.setAttribute("type", "button");
+          btn.setAttribute("data-category", cat);
+          btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
+          filtersContainer.appendChild(btn);
+        });
 
         filtersContainer.addEventListener("click", function (event) {
           const btn = event.target.closest(".filter-btn");
@@ -355,11 +332,6 @@
     }
   }
 
-  /**
-   * Copia texto al portapapeles devolviendo una promesa booleana
-   * @param {string} text
-   * @returns {Promise<boolean>}
-   */
   function copyToClipboardSafe(text) {
     if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
       return navigator.clipboard
@@ -374,21 +346,24 @@
     return Promise.resolve(false);
   }
 
-  /**
-   * 5. Gestiona el formulario de contacto con límites de longitud y manejo realista de WhatsApp
-   * (MAIN-002 y MAIN-003)
-   */
   function initContactForm() {
     const form = document.getElementById("contact-form");
     const feedback = document.getElementById("form-feedback");
 
     if (!form || !feedback) return;
 
-    // Desactivar validación nativa silenciosa para mostrar mensajes claros en #form-feedback
     form.setAttribute("novalidate", "novalidate");
+    let lastValidSubmitTs = 0;
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
+
+      const honeypotInput = document.getElementById("website-trap");
+      if (honeypotInput && typeof honeypotInput.value === "string" && honeypotInput.value.trim() !== "") {
+        feedback.textContent = "No fue posible procesar la solicitud.";
+        feedback.className = "form-feedback is-error";
+        return;
+      }
 
       const nameInput = document.getElementById("name");
       const emailInput = document.getElementById("email");
@@ -400,7 +375,6 @@
       const projectType = typeInput ? typeInput.value.trim() : "Proyecto general";
       const message = messageInput ? messageInput.value.trim() : "";
 
-      // Validaciones de presencia y límites de longitud (MAIN-002) sin borrar los datos del usuario
       if (!name) {
         feedback.textContent = "Por favor, escribe tu nombre para poder dirigirnos a ti.";
         feedback.className = "form-feedback is-error";
@@ -457,6 +431,18 @@
         return;
       }
 
+      const nowTs = Date.now();
+      if (
+        KAZVORA_CONFIG.contactCooldownMs > 0 &&
+        lastValidSubmitTs > 0 &&
+        nowTs - lastValidSubmitTs < KAZVORA_CONFIG.contactCooldownMs
+      ) {
+        feedback.textContent = "Espera un momento antes de volver a preparar el mensaje.";
+        feedback.className = "form-feedback is-error";
+        return;
+      }
+      lastValidSubmitTs = nowTs;
+
       const lines = [
         "Hola, equipo de KAZVORA Technologies.",
         "Mi nombre es " + name + ".",
@@ -472,7 +458,6 @@
       const preparedText = lines.join("\n");
       const validPhone = validateWhatsAppPhone(KAZVORA_CONFIG.whatsappNumber);
 
-      // MAIN-003: Si existe un número internacional válido, intentar abrir WhatsApp verificando bloqueo de popups
       if (validPhone) {
         const waUrl = "https://wa.me/" + validPhone + "?text=" + encodeURIComponent(preparedText);
         let popupWindow = null;
@@ -503,7 +488,6 @@
         return;
       }
 
-      // Modo estándar mientras el número de WhatsApp está pendiente de configuración
       copyToClipboardSafe(preparedText).then(function (copied) {
         if (copied) {
           feedback.textContent =
@@ -518,12 +502,13 @@
     });
   }
 
-  // Exponer funciones clave para auditoría y pruebas de regresión
   window.KAZVORA_MAIN_UTILS = {
     validateSafeUrl: validateSafeUrl,
     validateWhatsAppPhone: validateWhatsAppPhone,
     isValidOptionalEmail: isValidOptionalEmail,
-    FORM_LIMITS: Object.assign({}, FORM_LIMITS)
+    createProjectCardElement: createProjectCardElement,
+    FORM_LIMITS: Object.assign({}, FORM_LIMITS),
+    CONFIG: KAZVORA_CONFIG
   };
 
   document.addEventListener("DOMContentLoaded", function () {

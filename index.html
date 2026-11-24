@@ -3,8 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="KAZVORA Technologies: desarrollo web y soluciones digitales para convertir ideas en soluciones.">
+  <meta name="description" content="KAZVORA Technologies: desarrollo web, catálogos digitales y soluciones tecnológicas diseñadas para convertir ideas en soluciones.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="KAZVORA Technologies">
+  <meta property="og:title" content="KAZVORA Technologies | Tecnología que convierte ideas en soluciones">
+  <meta property="og:description" content="Desarrollo web, catálogos digitales y soluciones tecnológicas preparadas para crecer.">
   <title>KAZVORA Technologies | Tecnología que convierte ideas en soluciones</title>
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
@@ -13,6 +20,7 @@
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
       <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
@@ -22,7 +30,7 @@
       <span></span><span></span><span></span>
     </button>
     <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
-      <a class="active" href="index.html">Inicio</a>
+      <a class="active" aria-current="page" href="index.html">Inicio</a>
       <a href="portafolio.html">Portafolio</a>
       <a href="servicios.html">Servicios</a>
       <a href="nosotros.html">Nosotros</a>
@@ -33,63 +41,150 @@
   <main id="contenido">
     <section class="hero section-wrap">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="status-dot"></span> TECNOLOGÍA · CREATIVIDAD · INNOVACIÓN</p>
-        <h1>Convertimos ideas en <span class="gradient-text">soluciones digitales.</span></h1>
-        <p class="hero-lead">Diseñamos experiencias web y herramientas digitales útiles para personas, profesionales y negocios que quieren avanzar.</p>
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> INGENIERÍA DIGITAL · DISEÑO · SEGURIDAD</p>
+        <h1>Tecnología que convierte ideas en <span class="gradient-text">soluciones reales.</span></h1>
+        <p class="hero-lead">Construimos sitios web rápidos, catálogos comerciales listos para móvil y plataformas digitales sólidas para negocios y profesionales que buscan avanzar con claridad.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="portafolio.html">Explorar proyectos <span aria-hidden="true">↗</span></a>
-          <a class="button button-secondary" href="contacto.html">Hablemos de tu idea</a>
+          <a class="button button-primary" href="portafolio.html">Explorar portafolio <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="contacto.html">Iniciar una consulta</a>
         </div>
-        <div class="hero-note"><span class="note-line"></span><span>Ideas claras. Soluciones prácticas. Crecimiento constante.</span></div>
+        <div class="hero-note">
+          <span class="note-line" aria-hidden="true"></span>
+          <span>Ideas que se convierten en soluciones.</span>
+        </div>
       </div>
-      <div class="hero-art" aria-label="Ilustración abstracta de la identidad tecnológica de KAZVORA">
-        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+
+      <div class="hero-art" aria-label="Identidad tecnológica geométrica de KAZVORA Technologies">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
         <div class="art-glow"></div>
-        <div class="monogram"><span>K</span><i></i><span>Z</span></div>
-        <div class="art-caption"><span class="caption-dot"></span> BUILT FOR WHAT'S NEXT</div>
-        <div class="floating-chip chip-top"><span class="chip-symbol">&lt;/&gt;</span> WEB</div>
-        <div class="floating-chip chip-bottom"><span class="chip-symbol">✳</span> IDEAS → IMPACTO</div>
+        <div class="monogram" aria-hidden="true"><span>K</span><i></i><span>Z</span></div>
+        <div class="art-caption"><span class="caption-dot" aria-hidden="true"></span> KAZVORA TECHNOLOGIES · SYSTEM CORE</div>
+        <div class="floating-chip chip-top"><span class="chip-symbol" aria-hidden="true">&lt;/&gt;</span> WEB &amp; SOFTWARE</div>
+        <div class="floating-chip chip-bottom"><span class="chip-symbol" aria-hidden="true">✦</span> IDEAS → SOLUCIONES</div>
       </div>
     </section>
 
-    <section class="trust-strip" aria-label="Principios de trabajo">
-      <div><span class="strip-number">01</span><span>Diseño adaptable</span></div>
-      <div><span class="strip-number">02</span><span>Soluciones útiles</span></div>
-      <div><span class="strip-number">03</span><span>Evolución continua</span></div>
+    <section class="trust-strip" aria-label="Pilares de ingeniería">
+      <div><span class="strip-number">01</span><span>Diseño responsive de alto rendimiento</span></div>
+      <div><span class="strip-number">02</span><span>Seguridad y código limpio desde la base</span></div>
+      <div><span class="strip-number">03</span><span>Arquitectura preparada para escalar</span></div>
     </section>
 
-    <section class="section-wrap section-block">
+    <section class="section-wrap section-block" aria-labelledby="verticales-heading">
       <div class="section-heading">
-        <div><p class="eyebrow">LO QUE ESTAMOS CONSTRUYENDO</p><h2>Proyectos con <span class="gradient-text">propósito.</span></h2></div>
+        <div>
+          <p class="eyebrow">ECOSISTEMA TECNOLÓGICO</p>
+          <h2 id="verticales-heading">Cinco pilares, <span class="gradient-text">evolución honesta.</span></h2>
+          <p class="section-subtitle">Comenzamos entregando soluciones web y comerciales concretas hoy, mientras construimos la base técnica para nuestras áreas de expansión.</p>
+        </div>
+        <a class="text-link" href="servicios.html">Ver detalle de servicios <span aria-hidden="true">↗</span></a>
+      </div>
+
+      <div class="pillars-grid">
+        <article class="pillar-card">
+          <div class="pillar-icon red-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="8 6 2 12 8 18"></polyline><polyline points="16 6 22 12 16 18"></polyline><line x1="14" y1="4" x2="10" y2="20"></line></svg>
+          </div>
+          <h3>Desarrollo Web</h3>
+          <p>Sitios corporativos, páginas de aterrizaje y catálogos interactivos optimizados para móvil.</p>
+          <span class="pillar-tag pillar-tag-active">Disponible hoy</span>
+        </article>
+
+        <article class="pillar-card">
+          <div class="pillar-icon blue-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <h3>Software</h3>
+          <p>Herramientas digitales prácticas para pedidos, catálogos y flujos comerciales a medida.</p>
+          <span class="pillar-tag pillar-tag-active">Disponible hoy</span>
+        </article>
+
+        <article class="pillar-card pillar-card-future">
+          <div class="pillar-icon pink-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          </div>
+          <h3>Bases de Datos</h3>
+          <p>Estructuración de inventarios, historiales y paneles administrativos con seguridad.</p>
+          <span class="pillar-tag pillar-tag-roadmap">En evolución</span>
+        </article>
+
+        <article class="pillar-card pillar-card-future">
+          <div class="pillar-icon pink-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4"></path><path d="M12 18v4"></path><path d="M4.93 4.93l2.83 2.83"></path><path d="M16.24 16.24l2.83 2.83"></path><path d="M2 12h4"></path><path d="M18 12h4"></path></svg>
+          </div>
+          <h3>Inteligencia Artificial</h3>
+          <p>Automatización inteligente de atención, análisis y procesos operativos cuando el negocio lo requiera.</p>
+          <span class="pillar-tag pillar-tag-roadmap">Hoja de ruta</span>
+        </article>
+
+        <article class="pillar-card pillar-card-future">
+          <div class="pillar-icon blue-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+          </div>
+          <h3>Cloud Solutions</h3>
+          <p>Despliegues profesionales con dominio propio, HTTPS, CDN y monitoreo escalable.</p>
+          <span class="pillar-tag pillar-tag-roadmap">Hoja de ruta</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-wrap section-block" aria-labelledby="proyectos-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LO QUE ESTAMOS CONSTRUYENDO</p>
+          <h2 id="proyectos-heading">Proyectos y <span class="gradient-text">demostraciones.</span></h2>
+        </div>
         <a class="text-link" href="portafolio.html">Ver portafolio completo <span aria-hidden="true">↗</span></a>
       </div>
       <div id="featured-projects" class="project-grid" aria-live="polite"></div>
     </section>
 
-    <section class="section-wrap services-band">
-      <div class="services-band-copy">
-        <p class="eyebrow">DE LA IDEA A LA IMPLEMENTACIÓN</p>
-        <h2>Tecnología que trabaja para ti.</h2>
-        <p>Empezamos con soluciones digitales concretas y crecemos junto con las necesidades de cada proyecto.</p>
-        <a class="button button-primary" href="servicios.html">Conocer servicios <span aria-hidden="true">↗</span></a>
+    <section class="section-wrap section-block" aria-labelledby="metodo-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">METODOLOGÍA DE INGENIERÍA</p>
+          <h2 id="metodo-heading">Cómo llevamos tu proyecto <span class="gradient-text">de la idea a producción.</span></h2>
+        </div>
       </div>
-      <div class="capability-list">
-        <div><span class="cap-icon cap-red">01</span><div><strong>Desarrollo web</strong><small>Experiencias adaptables y accesibles</small></div><span class="cap-arrow">↗</span></div>
-        <div><span class="cap-icon cap-blue">02</span><div><strong>Soluciones digitales</strong><small>Herramientas prácticas para negocios</small></div><span class="cap-arrow">↗</span></div>
-        <div><span class="cap-icon cap-pink">03</span><div><strong>Software y datos</strong><small>Área de crecimiento progresivo</small></div><span class="cap-arrow">↗</span></div>
+      <div class="process-grid">
+        <article class="process-step">
+          <span class="process-step-num">PASO 01</span>
+          <h3>Diagnóstico y alcance claro</h3>
+          <p>Definimos exactamente qué problema resolver, qué funciones son prioritarias y un plan realista sin costos ocultos.</p>
+        </article>
+        <article class="process-step">
+          <span class="process-step-num">PASO 02</span>
+          <h3>Diseño e ingeniería segura</h3>
+          <p>Construimos interfaces rápidas, accesibles y adaptables a cualquier celular con buenas prácticas de seguridad desde el código.</p>
+        </article>
+        <article class="process-step">
+          <span class="process-step-num">PASO 03</span>
+          <h3>Pruebas, entrega y crecimiento</h3>
+          <p>Verificamos cada enlace, formulario y pantalla antes de publicar, dejando una base lista para incorporar nuevas funciones después.</p>
+        </article>
       </div>
     </section>
 
     <section class="section-wrap closing-cta">
-      <div><p class="eyebrow">¿TIENES UNA IDEA?</p><h2>Hagamos que <span class="gradient-text">avance.</span></h2></div>
+      <div>
+        <p class="eyebrow">¿TIENES UN NEGOCIO O UNA IDEA?</p>
+        <h2>Construyamos algo <span class="gradient-text">que funcione de verdad.</span></h2>
+      </div>
       <a class="button button-primary" href="contacto.html">Cuéntanos tu proyecto <span aria-hidden="true">↗</span></a>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand footer-brand" href="index.html"><span class="brand-mark" aria-hidden="true">K<span>Z</span></span><span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span></a>
+    <a class="brand footer-brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
+      <span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span>
+    </a>
     <p>Tecnología que convierte ideas en soluciones.</p>
-    <div class="footer-bottom"><span>© <span id="year"></span> KAZVORA Technologies</span><span>Construido con intención. Diseñado para crecer.</span></div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> KAZVORA Technologies</span>
+      <span>Ideas que se convierten en soluciones.</span>
+    </div>
   </footer>
 </body>
 </html>
