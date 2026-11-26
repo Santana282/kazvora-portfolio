@@ -1,9 +1,10 @@
 /**
- * KAZVORA Technologies — Demostración Comercial #1: Dulce Atelier v2.1 (demos/reposteria/app.js)
+ * KAZVORA Technologies — Demostración Comercial #1: Dulce Atelier v2.1.1 (demos/reposteria/app.js)
  * - Construcción 100 % nativa del DOM (sin innerHTML: protección estructural anti-XSS)
  * - Configuración desacoplada vía window.KAZVORA_ENV (js/config.js)
  * - Carrito inicialmente vacío, tope de 10 unidades por producto y validación entera
  * - Teléfono E.164 sin números ficticios, fecha mínima local y accesibilidad ARIA completa
+ * - Manejo robusto de bloqueador de ventanas emergentes aun sin acceso a navigator.clipboard
  */
 (function () {
   "use strict";
@@ -526,19 +527,22 @@
     return setProductQuantity(productId, next);
   }
 
-  function copyTextToClipboard(text, feedbackEl, successMessage) {
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-      navigator.clipboard
+  function copyToClipboardSafe(text) {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      return navigator.clipboard
         .writeText(text)
         .then(function () {
-          if (feedbackEl) feedbackEl.textContent = successMessage;
+          return true;
         })
         .catch(function () {
-          if (feedbackEl) feedbackEl.textContent = "Resumen listo en la vista previa superior.";
+          return false;
         });
-    } else if (feedbackEl) {
-      feedbackEl.textContent = "Resumen listo en la vista previa superior.";
     }
+    return Promise.resolve(false);
   }
 
   window.KAZVORA_BAKERY_DEMO = {
@@ -649,25 +653,29 @@
             popupWindow = null;
           }
 
-          if (popupWindow) {
-            if (feedback) {
+          copyToClipboardSafe(message).then(function (copied) {
+            if (!feedback) return;
+            if (popupWindow) {
               feedback.textContent =
-                "Pedido preparado. Se solicitó abrir WhatsApp en una nueva pestaña (recuerda confirmar el envío en WhatsApp).";
+                "Pedido preparado. Se solicitó abrir WhatsApp en una nueva pestaña (recuerda confirmar el envío en WhatsApp)." +
+                (copied ? " Copiamos un respaldo en tu portapapeles." : "");
+            } else {
+              feedback.textContent =
+                "Tu navegador bloqueó la ventana emergente de WhatsApp. " +
+                (copied
+                  ? "Copiamos el pedido a tu portapapeles como respaldo."
+                  : "Permite ventanas emergentes para este sitio o copia el resumen desde la vista previa superior.");
             }
-          } else {
-            copyTextToClipboard(
-              message,
-              feedback,
-              "Tu navegador bloqueó la ventana emergente. Copiamos el pedido a tu portapapeles como respaldo."
-            );
-          }
-        } else {
-          copyTextToClipboard(
-            message,
-            feedback,
-            "✓ Canal de WhatsApp no configurado en esta demostración. Tu pedido fue preparado y copiado al portapapeles."
-          );
+          });
+          return;
         }
+
+        copyToClipboardSafe(message).then(function (copied) {
+          if (!feedback) return;
+          feedback.textContent = copied
+            ? "✓ Canal de WhatsApp no configurado en esta demostración. Tu pedido fue preparado y copiado al portapapeles."
+            : "Canal de WhatsApp no configurado en esta demostración. Copia el resumen desde la vista previa superior.";
+        });
       });
     }
 
@@ -690,7 +698,12 @@
         }
 
         const message = buildWhatsAppMessage();
-        copyTextToClipboard(message, feedback, "✓ Resumen del pedido copiado al portapapeles.");
+        copyToClipboardSafe(message).then(function (copied) {
+          if (!feedback) return;
+          feedback.textContent = copied
+            ? "✓ Resumen del pedido copiado al portapapeles."
+            : "Resumen listo en la vista previa superior para copiarlo manualmente.";
+        });
       });
     }
   });
