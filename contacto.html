@@ -6,12 +6,12 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="Contacta a KAZVORA Technologies para conversar sobre tu proyecto web o catálogo digital.">
+  <meta name="description" content="Contacta a KAZVORA Technologies para preparar el alcance de tu proyecto web, catálogo digital o agenda de citas.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_MX">
   <meta property="og:site_name" content="KAZVORA Technologies">
   <meta property="og:title" content="Contacto | KAZVORA Technologies">
-  <meta property="og:description" content="Comparte tu idea con KAZVORA Technologies para definir alcance, tiempos y próximos pasos.">
+  <meta property="og:description" content="Prepara un resumen estructurado de tu idea con KAZVORA Technologies para definir alcance, tiempos y próximos pasos.">
   <title>Contacto | KAZVORA Technologies</title>
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
@@ -40,9 +40,9 @@
 
   <main id="contenido">
     <section class="page-hero section-wrap">
-      <p class="eyebrow">CONTACTO</p>
+      <p class="eyebrow">CONTACTO Y ALCANCE INICIAL</p>
       <h1>Cuéntanos tu <span class="gradient-text">idea.</span></h1>
-      <p>Comparte qué necesitas y podremos definir el alcance, los próximos pasos y una propuesta realista.</p>
+      <p>Comparte qué necesitas y prepararemos un resumen ordenado para definir el alcance, los próximos pasos y una propuesta realista.</p>
     </section>
 
     <section class="section-wrap contact-layout">
@@ -50,30 +50,30 @@
         <div class="contact-card">
           <span class="contact-card-icon blue-symbol" aria-hidden="true">↗</span>
           <h2>Hablemos de tu proyecto</h2>
-          <p>La forma más directa de comenzar es enviarnos un mensaje por WhatsApp. El enlace se activará en cuanto configuremos el número oficial de negocio.</p>
+          <p>La forma más directa de comenzar es enviarnos tu resumen por WhatsApp. El enlace directo se activará en cuanto configuremos el número oficial de negocio.</p>
           <span class="service-status">WhatsApp pendiente de configurar</span>
         </div>
         <div class="contact-card contact-card-small">
-          <span class="eyebrow">QUÉ NOS AYUDA A SABER</span>
+          <span class="eyebrow">QUÉ NOS AYUDA A COTIZAR MEJOR</span>
           <ul>
-            <li>Qué necesitas resolver</li>
-            <li>Para quién es el proyecto</li>
-            <li>Qué plazo tienes en mente</li>
-            <li>Qué funciones son indispensables</li>
+            <li>Qué problema o proceso quieres resolver</li>
+            <li>Para quién está pensado el sitio o catálogo</li>
+            <li>Si ya cuentas con logotipo, fotos o dominio</li>
+            <li>Qué plazo objetivo tienes en mente</li>
           </ul>
         </div>
       </div>
 
       <form class="contact-form" id="contact-form">
         <h2>Prepara tu consulta</h2>
-        <p>Completa los campos y prepararemos tu mensaje localmente en el navegador (no guardamos estos datos en servidores).</p>
+        <p>Completa los campos y generaremos un mensaje estructurado localmente en tu navegador (no guardamos estos datos en servidores).</p>
 
         <div class="hp-field" aria-hidden="true">
           <label for="website-trap">No completar este campo</label>
           <input id="website-trap" name="website-trap" type="text" tabindex="-1" autocomplete="off">
         </div>
 
-        <label for="name">Tu nombre</label>
+        <label for="name">Tu nombre *</label>
         <input id="name" name="name" autocomplete="name" minlength="2" maxlength="80" required placeholder="¿Cómo te llamas?">
 
         <label for="email">Correo electrónico (opcional)</label>
@@ -81,14 +81,30 @@
 
         <label for="project-type">Tipo de proyecto</label>
         <select id="project-type" name="project-type">
-          <option>Desarrollo web</option>
-          <option>Catálogo digital</option>
-          <option>Consulta general</option>
-          <option>Otro proyecto</option>
+          <option value="Desarrollo web">Desarrollo web</option>
+          <option value="Catálogo digital">Catálogo digital</option>
+          <option value="Agenda y sistema de citas">Agenda y sistema de citas</option>
+          <option value="Consulta general">Consulta general</option>
+          <option value="Otro proyecto">Otro proyecto</option>
         </select>
 
-        <label for="message">¿Qué necesitas?</label>
-        <textarea id="message" name="message" rows="5" minlength="10" maxlength="1000" required placeholder="Cuéntanos brevemente tu idea (mínimo 10 caracteres)..."></textarea>
+        <label for="has-domain">¿Cuentas con dominio o sitio actual?</label>
+        <select id="has-domain" name="has-domain">
+          <option value="Aún no, empezaría desde cero">Aún no, empezaría desde cero</option>
+          <option value="Sí, ya cuento con dominio">Sí, ya cuento con dominio</option>
+          <option value="Sí, quiero mejorar un sitio existente">Sí, quiero mejorar un sitio existente</option>
+          <option value="Necesito orientación">Necesito orientación</option>
+        </select>
+
+        <label for="target-timeline">Plazo estimado</label>
+        <select id="target-timeline" name="target-timeline">
+          <option value="Lo antes posible (2 a 4 semanas)">Lo antes posible (2 a 4 semanas)</option>
+          <option value="En 1 a 2 meses">En 1 a 2 meses</option>
+          <option value="Sin fecha fija · Estoy explorando">Sin fecha fija · Estoy explorando</option>
+        </select>
+
+        <label for="message">¿Qué necesitas? *</label>
+        <textarea id="message" name="message" rows="5" minlength="10" maxlength="1000" required placeholder="Cuéntanos brevemente tu negocio o idea (mínimo 10 caracteres)..."></textarea>
 
         <button class="button button-primary" type="submit">Preparar mensaje <span aria-hidden="true">↗</span></button>
         <p id="form-feedback" class="form-feedback" aria-live="polite"></p>

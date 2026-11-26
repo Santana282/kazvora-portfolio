@@ -1,10 +1,9 @@
 /**
- * KAZVORA Technologies — Controlador Principal Seguro v2.1 (js/main.js)
+ * KAZVORA Technologies — Controlador Principal Seguro v2.2 (js/main.js)
  * - Construcción 100 % nativa del DOM (sin innerHTML: mitigación estructural contra XSS)
  * - Validación positiva de URLs (HTTP, HTTPS y rutas relativas limpias)
- * - Menú móvil accesible con tecla Escape y sincronización aria-expanded
- * - Portafolio destacado y filtrable con validación defensiva de esquema
- * - Formulario de contacto con límites de longitud, honeypot, cooldown y respaldo de portapapeles
+ * - Preselección segura por lista blanca del parámetro ?tipo= en contacto.html
+ * - Formulario estructurado con límites, honeypot, cooldown y respaldo de portapapeles/WhatsApp
  */
 (function () {
   "use strict";
@@ -30,12 +29,22 @@
     NAME_MAX: 80,
     EMAIL_MAX: 120,
     TYPE_MAX: 60,
+    OPTION_MAX: 80,
     MESSAGE_MIN: 10,
     MESSAGE_MAX: 1000
   };
 
   const ALLOWED_CATEGORIES = ["Web", "Catálogo digital", "Datos y software"];
   const ALLOWED_THEMES = ["red", "blue", "pink"];
+
+  // Lista blanca estricta para preseleccionar el tipo de proyecto vía URL (?tipo=...)
+  const ALLOWED_PROJECT_TYPE_PARAMS = Object.freeze({
+    web: "Desarrollo web",
+    catalogo: "Catálogo digital",
+    citas: "Agenda y sistema de citas",
+    consulta: "Consulta general",
+    otro: "Otro proyecto"
+  });
 
   function clearContainer(container) {
     while (container.firstChild) {
@@ -118,6 +127,32 @@
     if (!email) return true;
     if (email.length > FORM_LIMITS.EMAIL_MAX) return false;
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  }
+
+  function resolveAllowedProjectTypeFromQuery(searchString) {
+    if (typeof searchString !== "string" || !searchString) return null;
+    const cleaned = searchString.startsWith("?") ? searchString.slice(1) : searchString;
+    if (!cleaned) return null;
+
+    const pairs = cleaned.split("&");
+    for (let i = 0; i < pairs.length; i += 1) {
+      const idx = pairs[i].indexOf("=");
+      if (idx === -1) continue;
+      const key = pairs[i].slice(0, idx).toLowerCase();
+      if (key === "tipo") {
+        let rawVal = "";
+        try {
+          rawVal = decodeURIComponent(pairs[i].slice(idx + 1)).trim().toLowerCase();
+        } catch (err) {
+          return null;
+        }
+        if (Object.prototype.hasOwnProperty.call(ALLOWED_PROJECT_TYPE_PARAMS, rawVal)) {
+          return ALLOWED_PROJECT_TYPE_PARAMS[rawVal];
+        }
+        return null;
+      }
+    }
+    return null;
   }
 
   function getValidatedProjects() {
@@ -333,7 +368,11 @@
   }
 
   function copyToClipboardSafe(text) {
-    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
       return navigator.clipboard
         .writeText(text)
         .then(function () {
@@ -346,12 +385,23 @@
     return Promise.resolve(false);
   }
 
+  function applySafeContactPrefill() {
+    const typeSelect = document.getElementById("project-type");
+    if (!typeSelect || typeof window === "undefined" || !window.location) return;
+
+    const matchedType = resolveAllowedProjectTypeFromQuery(window.location.search || "");
+    if (matchedType) {
+      typeSelect.value = matchedType;
+    }
+  }
+
   function initContactForm() {
     const form = document.getElementById("contact-form");
     const feedback = document.getElementById("form-feedback");
 
     if (!form || !feedback) return;
 
+    applySafeContactPrefill();
     form.setAttribute("novalidate", "novalidate");
     let lastValidSubmitTs = 0;
 
@@ -368,11 +418,15 @@
       const nameInput = document.getElementById("name");
       const emailInput = document.getElementById("email");
       const typeInput = document.getElementById("project-type");
+      const domainInput = document.getElementById("has-domain");
+      const timelineInput = document.getElementById("target-timeline");
       const messageInput = document.getElementById("message");
 
       const name = nameInput ? nameInput.value.trim() : "";
       const email = emailInput ? emailInput.value.trim() : "";
       const projectType = typeInput ? typeInput.value.trim() : "Proyecto general";
+      const domainStatus = domainInput ? domainInput.value.trim() : "";
+      const targetTimeline = timelineInput ? timelineInput.value.trim() : "";
       const message = messageInput ? messageInput.value.trim() : "";
 
       if (!name) {
@@ -404,8 +458,12 @@
         return;
       }
 
-      if (projectType.length > FORM_LIMITS.TYPE_MAX) {
-        feedback.textContent = "El tipo de proyecto seleccionado excede la longitud permitida.";
+      if (
+        projectType.length > FORM_LIMITS.TYPE_MAX ||
+        domainStatus.length > FORM_LIMITS.OPTION_MAX ||
+        targetTimeline.length > FORM_LIMITS.OPTION_MAX
+      ) {
+        feedback.textContent = "Alguno de los campos seleccionados excede la longitud permitida.";
         feedback.className = "form-feedback is-error";
         return;
       }
@@ -447,6 +505,8 @@
         "Hola, equipo de KAZVORA Technologies.",
         "Mi nombre es " + name + ".",
         "Tipo de proyecto: " + projectType + ".",
+        domainStatus ? "Dominio / sitio actual: " + domainStatus + "." : null,
+        targetTimeline ? "Plazo estimado: " + targetTimeline + "." : null,
         email ? "Correo de contacto: " + email + "." : null,
         "",
         "Detalles de mi idea:",
@@ -506,6 +566,7 @@
     validateSafeUrl: validateSafeUrl,
     validateWhatsAppPhone: validateWhatsAppPhone,
     isValidOptionalEmail: isValidOptionalEmail,
+    resolveAllowedProjectTypeFromQuery: resolveAllowedProjectTypeFromQuery,
     createProjectCardElement: createProjectCardElement,
     FORM_LIMITS: Object.assign({}, FORM_LIMITS),
     CONFIG: KAZVORA_CONFIG

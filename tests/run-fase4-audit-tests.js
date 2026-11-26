@@ -1,12 +1,14 @@
 /**
- * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.1.1 (Node.js 22+)
+ * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.2 (Node.js 22+)
  * Archivo: tests/run-fase4-audit-tests.js
  *
- * Correcciones v2.1.1:
- * - Usa Object.defineProperty(global, 'navigator', ...) para compatibilidad real con Node.js 21/22+,
- *   donde globalThis.navigator es un getter nativo de solo lectura.
- * - Incluye detalle diagnóstico en cualquier fallo futuro.
- * - Detecta y valida automáticamente demos/clinica-citas/ cuando exista en el repositorio.
+ * Cubre:
+ * - Arquitectura DOM nativa (0 innerHTML en controladores)
+ * - Configuración desacoplada (js/config.js) y CSP/Referrer-Policy en todas las vistas (incl. 404.html)
+ * - Validación positiva de URLs y esquema de proyectos
+ * - Preselección segura de ?tipo= por lista blanca (anti DOM-XSS y anti prototype pollution)
+ * - Brief estructurado de contacto, honeypot, portapapeles asíncrono y cooldown
+ * - Demostración Comercial #1 (Repostería) y Demostración Comercial #2 (Clínica de Citas)
  */
 
 const fs = require('fs');
@@ -87,7 +89,8 @@ function createNativeMockDOM() {
 
   [
     'year', 'main-nav', 'featured-projects', 'all-projects', 'project-filters',
-    'contact-form', 'form-feedback', 'website-trap', 'name', 'email', 'project-type', 'message',
+    'contact-form', 'form-feedback', 'website-trap', 'name', 'email',
+    'project-type', 'has-domain', 'target-timeline', 'message',
     'delivery-date', 'bakery-filters', 'bakery-grid', 'order-items-list',
     'order-total-amount', 'header-item-count', 'whatsapp-preview',
     'mobile-order-bar', 'mobile-bar-count', 'mobile-bar-total',
@@ -131,7 +134,7 @@ async function runSuite() {
   const { documentMock, elementsById } = createNativeMockDOM();
 
   let lastClipboardText = null;
-  let clipboardMode = 'resolve'; // 'resolve' | 'reject' | 'deferred'
+  let clipboardMode = 'resolve';
   let deferredResolve = null;
   let simulatePopupBlocked = false;
   let lastCreatedPopup = null;
@@ -139,9 +142,8 @@ async function runSuite() {
   global.window = global;
   global.document = documentMock;
   global.innerWidth = 1024;
+  global.location = { search: '?tipo=citas' };
 
-  // En Node.js 21/22+, global.navigator es un getter nativo de solo lectura;
-  // Object.defineProperty permite sobrescribirlo de forma confiable en pruebas.
   Object.defineProperty(global, 'navigator', {
     value: {
       clipboard: {
@@ -178,6 +180,8 @@ async function runSuite() {
   const baseDir = path.resolve(__dirname, '..');
   const clinicAppPath = path.join(baseDir, 'demos', 'clinica-citas', 'app.js');
   const hasClinicDemo = fs.existsSync(clinicAppPath);
+  const page404Path = path.join(baseDir, '404.html');
+  const has404 = fs.existsSync(page404Path);
 
   require(path.join(baseDir, 'js', 'config.js'));
   require(path.join(baseDir, 'js', 'projects.js'));
@@ -204,49 +208,50 @@ async function runSuite() {
   const s = window.KAZVORA_SCHEMA;
   const d = window.KAZVORA_BAKERY_DEMO;
 
-  // 1. Arquitectura y Seguridad Anti-XSS (cero innerHTML ejecutable)
+  // 1. Seguridad DOM, Configuración y CSP
   const mainSrc = fs.readFileSync(path.join(baseDir, 'js', 'main.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   const appSrc = fs.readFileSync(path.join(baseDir, 'demos', 'reposteria', 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   const clinicSrc = hasClinicDemo
     ? fs.readFileSync(clinicAppPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
     : '';
 
-  test(
-    'SEC-DOM-01',
-    'XSS',
-    'Los controladores JS operan con 0 usos de innerHTML',
-    !mainSrc.includes('innerHTML') && !appSrc.includes('innerHTML') && !clinicSrc.includes('innerHTML'),
-    'Se detectó uso de innerHTML en código ejecutable'
-  );
-
-  test(
-    'ENV-01',
-    'Config',
-    'window.KAZVORA_ENV existe, está congelado y sin números ficticios',
-    Boolean(window.KAZVORA_ENV && Object.isFrozen(window.KAZVORA_ENV) && window.KAZVORA_ENV.whatsappNumber === '')
-  );
+  test('SEC-DOM-01', 'XSS', 'Los controladores JS operan con 0 usos de innerHTML', !mainSrc.includes('innerHTML') && !appSrc.includes('innerHTML') && !clinicSrc.includes('innerHTML'));
+  test('ENV-01', 'Config', 'window.KAZVORA_ENV existe, está congelado y sin números ficticios', Boolean(window.KAZVORA_ENV && Object.isFrozen(window.KAZVORA_ENV) && window.KAZVORA_ENV.whatsappNumber === ''));
 
   const htmlPages = ['index.html', 'portafolio.html', 'servicios.html', 'nosotros.html', 'contacto.html', 'demos/reposteria/index.html'];
   if (hasClinicDemo && fs.existsSync(path.join(baseDir, 'demos', 'clinica-citas', 'index.html'))) {
     htmlPages.push('demos/clinica-citas/index.html');
   }
+  if (has404) {
+    htmlPages.push('404.html');
+  }
   const missingCsp = htmlPages.filter(p => {
     const html = fs.readFileSync(path.join(baseDir, p), 'utf8');
     return !(html.includes('http-equiv="Content-Security-Policy"') && html.includes('name="referrer"'));
   });
-  test(
-    'SEC-CSP-01',
-    'CSP',
-    'Todas las páginas HTML declaran Content-Security-Policy y Referrer-Policy',
-    missingCsp.length === 0,
-    'Falta CSP o Referrer en: ' + missingCsp.join(', ')
-  );
+  test('SEC-CSP-01', 'CSP', 'Todas las páginas HTML declaran Content-Security-Policy y Referrer-Policy', missingCsp.length === 0, 'Falta en: ' + missingCsp.join(', '));
 
-  // 2. Validación positiva de URLs (MAIN-001)
+  if (has404) {
+    const html404 = fs.readFileSync(page404Path, 'utf8');
+    test('SEC-404-01', 'Resiliencia', '404.html incluye favicon.svg, robots noindex y enlace a index.html', html404.includes('assets/icons/favicon.svg') && html404.includes('noindex') && html404.includes('index.html'));
+  }
+
+  // 2. Validación positiva de URLs y parámetros de consulta
   test('URL-01', 'MAIN-001', 'Acepta HTTPS, HTTP y ruta relativa limpia', u.validateSafeUrl('https://kazvora.com') === 'https://kazvora.com' && u.validateSafeUrl('http://example.com') === 'http://example.com' && u.validateSafeUrl('demos/reposteria/index.html') === 'demos/reposteria/index.html');
   test('URL-02', 'MAIN-001', 'Rechaza javascript:, data:, vbscript:, // y comillas', u.validateSafeUrl('javascript:alert(1)') === null && u.validateSafeUrl('data:text/html,<script>') === null && u.validateSafeUrl('vbscript:alert(1)') === null && u.validateSafeUrl('//evil.com') === null && u.validateSafeUrl('https://a.com/"onclick="x') === null);
 
-  // 3. Tarjetas DOM nativas y esquema de proyectos
+  test(
+    'SEC-URLPARAM-01',
+    'Seguridad',
+    'Preselección ?tipo= acepta lista blanca y bloquea XSS, __proto__ y encoding malformado',
+    elementsById['project-type'].value === 'Agenda y sistema de citas' &&
+    u.resolveAllowedProjectTypeFromQuery('?tipo=catalogo') === 'Catálogo digital' &&
+    u.resolveAllowedProjectTypeFromQuery('?tipo=<script>alert(1)</script>') === null &&
+    u.resolveAllowedProjectTypeFromQuery('?tipo=__proto__') === null &&
+    u.resolveAllowedProjectTypeFromQuery('?tipo=%E0%A4%A') === null
+  );
+
+  // 3. Portafolio y esquema
   const featuredCards = elementsById['featured-projects'].children;
   test('PROJ-01', 'Portafolio', 'Renderizado DOM nativo de proyectos destacados', featuredCards.length >= 1 && featuredCards[0].tagName === 'ARTICLE');
   if (s && typeof s.validateKazvoraProjects === 'function') {
@@ -258,7 +263,7 @@ async function runSuite() {
     test('PROJ-02', 'Esquema', 'Validador de esquema descarta duplicados y URLs peligrosas', filtered.length === 1 && filtered[0].id === 'ok-1');
   }
 
-  // 4. Formulario de contacto (validación, honeypot, asíncrono portapapeles, rechazo y cooldown)
+  // 4. Formulario de contacto y brief comercial
   const form = elementsById['contact-form'];
   const fb = elementsById['form-feedback'];
   const origCooldown = u.CONFIG.contactCooldownMs;
@@ -278,12 +283,15 @@ async function runSuite() {
   clipboardMode = 'deferred';
   elementsById['name'].value = 'Carlos Santana';
   elementsById['email'].value = 'carlos@kazvora.com';
+  elementsById['has-domain'].value = 'Aún no, empezaría desde cero';
+  elementsById['target-timeline'].value = 'Lo antes posible (2 a 4 semanas)';
   elementsById['message'].value = 'Necesito un sitio web corporativo adaptable a móvil.';
   form.dispatchEvent('submit', { preventDefault() {} });
   const pendingOk = !fb.className.includes('is-success') && lastClipboardText === null;
   if (deferredResolve) deferredResolve();
   await flushAsync();
   const resolvedOk = fb.className.includes('is-success') && typeof lastClipboardText === 'string' && lastClipboardText.includes('Carlos Santana');
+  const briefFieldsOk = typeof lastClipboardText === 'string' && lastClipboardText.includes('Aún no, empezaría desde cero') && lastClipboardText.includes('Lo antes posible (2 a 4 semanas)');
 
   clipboardMode = 'reject';
   fb.className = ''; fb.textContent = '';
@@ -291,13 +299,8 @@ async function runSuite() {
   await flushAsync();
   const fallbackOk = fb.className.includes('is-success') && fb.textContent.includes('cópialo manualmente');
   clipboardMode = 'resolve';
-  test(
-    'FORM-03',
-    'Asíncrono',
-    'Portapapeles asíncrono sin falso positivo y respaldo ante rechazo',
-    pendingOk && resolvedOk && fallbackOk,
-    JSON.stringify({ pendingOk, resolvedOk, fallbackOk, feedback: fb.textContent })
-  );
+  test('FORM-03', 'Asíncrono', 'Portapapeles asíncrono sin falso positivo y respaldo ante rechazo', pendingOk && resolvedOk && fallbackOk);
+  test('FORM-05', 'Brief', 'El mensaje estructurado incluye estado de dominio y plazo estimado', briefFieldsOk);
 
   u.CONFIG.contactCooldownMs = 5000;
   form.dispatchEvent('submit', { preventDefault() {} });
@@ -361,15 +364,9 @@ async function runSuite() {
   elementsById['customer-name'].value = '';
   elementsById['delivery-date'].value = '';
 
-  test(
-    'DEMO-07',
-    'Popups',
-    'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups',
-    popOk && popBlockedOk,
-    JSON.stringify({ popOk, popBlockedOk, popBlockedFeedback })
-  );
+  test('DEMO-07', 'Popups', 'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups', popOk && popBlockedOk, JSON.stringify({ popOk, popBlockedOk, popBlockedFeedback }));
 
-  // 6. Demostración #2: Clínica Dental (si ya existe en el repositorio)
+  // 6. Demostración #2: Clínica Dental
   if (hasClinicDemo && window.KAZVORA_CLINIC_DEMO) {
     const c = window.KAZVORA_CLINIC_DEMO;
     test(
