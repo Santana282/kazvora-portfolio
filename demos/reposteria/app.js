@@ -1,22 +1,29 @@
 /**
- * KAZVORA Technologies — Demostración Comercial #1: Dulce Atelier (demos/reposteria/app.js)
- * Intervención Técnica Fase 4:
- * - DEMO-001: Inicialización del carrito estrictamente vacío ({})
- * - DEMO-002: Límite superior configurable (MAX_QTY_PER_PRODUCT = 10) y validación entera no negativa
- * - DEMO-003: Validación internacional E.164 del número de WhatsApp sin números ficticios
- * - DEMO-004: Atributos aria-pressed sincronizados en filtros conservando el foco de teclado
- * - DEMO-005: Fecha mínima igual al día local actual y rechazo de fechas pasadas
- * - DEMO-006: Etiquetas aria-label específicas por producto en cada botón de acción
+ * KAZVORA Technologies — Demostración Comercial #1: Dulce Atelier v2.1 (demos/reposteria/app.js)
+ * - Construcción 100 % nativa del DOM (sin innerHTML: protección estructural anti-XSS)
+ * - Configuración desacoplada vía window.KAZVORA_ENV (js/config.js)
+ * - Carrito inicialmente vacío, tope de 10 unidades por producto y validación entera
+ * - Teléfono E.164 sin números ficticios, fecha mínima local y accesibilidad ARIA completa
  */
 (function () {
   "use strict";
 
+  const ENV =
+    typeof window !== "undefined" &&
+    window.KAZVORA_ENV &&
+    typeof window.KAZVORA_ENV === "object"
+      ? window.KAZVORA_ENV
+      : {};
+
   const DEMO_CONFIG = {
     businessName: "Dulce Atelier (Demo KAZVORA)",
-    // Se conserva vacío "" por restricción comercial. Cuando se configure un número válido E.164
-    // (ej. "522721234567"), se habilitará la apertura de WhatsApp.
-    whatsappNumber: "",
-    maxQuantityPerProduct: 10
+    // Conservado vacío "" hasta autorización comercial explícita.
+    whatsappNumber:
+      typeof ENV.demoBakeryWhatsappNumber === "string" ? ENV.demoBakeryWhatsappNumber : "",
+    maxQuantityPerProduct:
+      Number.isSafeInteger(ENV.demoMaxQuantityPerProduct) && ENV.demoMaxQuantityPerProduct > 0
+        ? ENV.demoMaxQuantityPerProduct
+        : 10
   };
 
   const DEMO_PRODUCTS = [
@@ -88,19 +95,21 @@
     }
   ];
 
-  // DEMO-001: El carrito comienza completamente vacío
+  // Carrito inicialmente vacío
   const orderState = Object.create(null);
-
   let activeCategory = "Todos";
 
-  function escapeHTML(str) {
-    if (str === null || str === undefined) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  function clearContainer(container) {
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+  }
+
+  function createEl(tag, className, text) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined && text !== null) el.textContent = String(text);
+    return el;
   }
 
   function formatCurrency(amount) {
@@ -108,11 +117,6 @@
     return "$" + safeAmount.toLocaleString("es-MX") + " MXN";
   }
 
-  /**
-   * DEMO-003: Valida número telefónico en formato internacional E.164 (11 a 15 dígitos, sin iniciar en 0)
-   * @param {string} rawPhone
-   * @returns {string|null}
-   */
   function validateWhatsAppPhone(rawPhone) {
     if (typeof rawPhone !== "string") return null;
     const trimmed = rawPhone.trim();
@@ -130,10 +134,6 @@
     return digits;
   }
 
-  /**
-   * DEMO-005: Obtiene la fecha actual en la zona horaria local del usuario en formato YYYY-MM-DD
-   * @returns {string}
-   */
   function getTodayLocalISO() {
     const now = new Date();
     const year = now.getFullYear();
@@ -142,11 +142,6 @@
     return year + "-" + month + "-" + day;
   }
 
-  /**
-   * DEMO-005: Verifica que una cadena YYYY-MM-DD sea una fecha real de calendario y no sea anterior a hoy
-   * @param {string} dateStr
-   * @returns {{ valid: boolean, reason: string }}
-   */
   function validateDeliveryDate(dateStr) {
     if (typeof dateStr !== "string" || dateStr.trim() === "") {
       return { valid: true, reason: "" };
@@ -281,9 +276,45 @@
     return lines.join("\n");
   }
 
-  /**
-   * DEMO-004: Renderiza los filtros con aria-pressed y actualiza su estado sin destruir el foco del teclado
-   */
+  function createQtyControls(product, qty, isSummary) {
+    const group = createEl("div", "qty-controls");
+    group.setAttribute("role", "group");
+    group.setAttribute(
+      "aria-label",
+      isSummary
+        ? "Ajustar cantidad de " + product.name + " en el resumen"
+        : "Cantidad de " + product.name
+    );
+
+    const decBtn = createEl("button", "qty-btn", "−");
+    decBtn.setAttribute("type", "button");
+    decBtn.setAttribute("data-action", "dec");
+    decBtn.setAttribute("data-id", product.id);
+    decBtn.setAttribute(
+      "aria-label",
+      (isSummary ? "Quitar una unidad de " : "Disminuir cantidad de ") + product.name
+    );
+
+    const valueSpan = createEl("span", "qty-value", String(qty));
+    if (!isSummary) {
+      valueSpan.setAttribute("aria-live", "polite");
+    }
+
+    const incBtn = createEl("button", "qty-btn", "+");
+    incBtn.setAttribute("type", "button");
+    incBtn.setAttribute("data-action", "inc");
+    incBtn.setAttribute("data-id", product.id);
+    incBtn.setAttribute(
+      "aria-label",
+      (isSummary ? "Agregar una unidad de " : "Aumentar cantidad de ") + product.name
+    );
+
+    group.appendChild(decBtn);
+    group.appendChild(valueSpan);
+    group.appendChild(incBtn);
+    return group;
+  }
+
   function renderFilters() {
     const container = document.getElementById("bakery-filters");
     if (!container) return;
@@ -306,31 +337,26 @@
       return;
     }
 
-    container.innerHTML = categories
-      .map(function (cat) {
-        const isCurrent = cat === activeCategory;
-        return (
-          '<button type="button" class="bakery-filter-btn' +
-          (isCurrent ? " active" : "") +
-          '" data-cat="' +
-          escapeHTML(cat) +
-          '" aria-pressed="' +
-          String(isCurrent) +
-          '">' +
-          escapeHTML(cat) +
-          "</button>"
-        );
-      })
-      .join("");
+    clearContainer(container);
+    categories.forEach(function (cat) {
+      const isCurrent = cat === activeCategory;
+      const btn = createEl(
+        "button",
+        isCurrent ? "bakery-filter-btn active" : "bakery-filter-btn",
+        cat
+      );
+      btn.setAttribute("type", "button");
+      btn.setAttribute("data-cat", cat);
+      btn.setAttribute("aria-pressed", String(isCurrent));
+      container.appendChild(btn);
+    });
   }
 
-  /**
-   * DEMO-006: Renderiza el catálogo con nombres accesibles específicos por producto en cada botón
-   */
   function renderCatalog() {
     const grid = document.getElementById("bakery-grid");
     if (!grid) return;
 
+    clearContainer(grid);
     const filtered =
       activeCategory === "Todos"
         ? DEMO_PRODUCTS
@@ -338,71 +364,42 @@
             return p.category === activeCategory;
           });
 
-    grid.innerHTML = filtered
-      .map(function (product) {
-        const qty = orderState[product.id] || 0;
-        const safeName = escapeHTML(product.name);
-        const safeId = escapeHTML(product.id);
+    filtered.forEach(function (product) {
+      const qty = orderState[product.id] || 0;
+      const card = createEl("article", "product-card");
 
-        const controlHTML =
-          qty > 0
-            ? '<div class="qty-controls" role="group" aria-label="Cantidad de ' +
-              safeName +
-              '">' +
-                '<button type="button" class="qty-btn" data-action="dec" data-id="' +
-                safeId +
-                '" aria-label="Disminuir cantidad de ' +
-                safeName +
-                '">−</button>' +
-                '<span class="qty-value" aria-live="polite">' +
-                qty +
-                "</span>" +
-                '<button type="button" class="qty-btn" data-action="inc" data-id="' +
-                safeId +
-                '" aria-label="Aumentar cantidad de ' +
-                safeName +
-                '">+</button>' +
-              "</div>"
-            : '<button type="button" class="add-btn" data-action="inc" data-id="' +
-              safeId +
-              '" aria-label="Agregar ' +
-              safeName +
-              ' al pedido">Agregar +</button>';
+      const top = createEl("div", "product-top");
+      const emojiSpan = createEl("span", "product-emoji", product.emoji);
+      emojiSpan.setAttribute("aria-hidden", "true");
+      top.appendChild(emojiSpan);
+      top.appendChild(createEl("span", "product-demo-label", product.category + " · Demo"));
+      card.appendChild(top);
 
-        return (
-          '<article class="product-card">' +
-            '<div class="product-top">' +
-              '<span class="product-emoji" aria-hidden="true">' +
-              escapeHTML(product.emoji) +
-              "</span>" +
-              '<span class="product-demo-label">' +
-              escapeHTML(product.category) +
-              " · Demo</span>" +
-            "</div>" +
-            "<h3>" +
-            safeName +
-            "</h3>" +
-            '<p class="product-desc">' +
-            escapeHTML(product.description) +
-            "</p>" +
-            '<div class="product-meta">' +
-              "<span>" +
-              escapeHTML(product.portions) +
-              "</span>" +
-              "<span>" +
-              escapeHTML(product.prepTime) +
-              "</span>" +
-            "</div>" +
-            '<div class="product-bottom">' +
-              '<span class="product-price">$' +
-              product.price +
-              "</span>" +
-              controlHTML +
-            "</div>" +
-          "</article>"
-        );
-      })
-      .join("");
+      card.appendChild(createEl("h3", "", product.name));
+      card.appendChild(createEl("p", "product-desc", product.description));
+
+      const meta = createEl("div", "product-meta");
+      meta.appendChild(createEl("span", "", product.portions));
+      meta.appendChild(createEl("span", "", product.prepTime));
+      card.appendChild(meta);
+
+      const bottom = createEl("div", "product-bottom");
+      bottom.appendChild(createEl("span", "product-price", "$" + product.price));
+
+      if (qty > 0) {
+        bottom.appendChild(createQtyControls(product, qty, false));
+      } else {
+        const addBtn = createEl("button", "add-btn", "Agregar +");
+        addBtn.setAttribute("type", "button");
+        addBtn.setAttribute("data-action", "inc");
+        addBtn.setAttribute("data-id", product.id);
+        addBtn.setAttribute("aria-label", "Agregar " + product.name + " al pedido");
+        bottom.appendChild(addBtn);
+      }
+
+      card.appendChild(bottom);
+      grid.appendChild(card);
+    });
   }
 
   function renderOrderSummary() {
@@ -423,58 +420,35 @@
       totalAmount += entry.subtotal;
     });
 
-    if (headerCountEl) {
-      headerCountEl.textContent = String(totalCount);
-    }
-
-    if (totalEl) {
-      totalEl.textContent = formatCurrency(totalAmount);
-    }
+    if (headerCountEl) headerCountEl.textContent = String(totalCount);
+    if (totalEl) totalEl.textContent = formatCurrency(totalAmount);
 
     if (listEl) {
+      clearContainer(listEl);
       if (items.length === 0) {
-        listEl.innerHTML =
-          '<p class="empty-order">Tu bandeja está vacía. Agrega pasteles o postres desde el catálogo para probar la demostración.</p>';
+        listEl.appendChild(
+          createEl(
+            "p",
+            "empty-order",
+            "Tu bandeja está vacía. Agrega pasteles o postres desde el catálogo para probar la demostración."
+          )
+        );
       } else {
-        listEl.innerHTML = items
-          .map(function (entry) {
-            const safeName = escapeHTML(entry.product.name);
-            const safeId = escapeHTML(entry.product.id);
-            return (
-              '<div class="order-line">' +
-                '<div class="order-line-info">' +
-                  "<strong>" +
-                  safeName +
-                  "</strong>" +
-                  "<small>" +
-                  entry.qty +
-                  " × $" +
-                  entry.product.price +
-                  " = " +
-                  formatCurrency(entry.subtotal) +
-                  "</small>" +
-                "</div>" +
-                '<div class="qty-controls" role="group" aria-label="Ajustar cantidad de ' +
-                safeName +
-                ' en el resumen">' +
-                  '<button type="button" class="qty-btn" data-action="dec" data-id="' +
-                  safeId +
-                  '" aria-label="Quitar una unidad de ' +
-                  safeName +
-                  '">−</button>' +
-                  '<span class="qty-value">' +
-                  entry.qty +
-                  "</span>" +
-                  '<button type="button" class="qty-btn" data-action="inc" data-id="' +
-                  safeId +
-                  '" aria-label="Agregar una unidad de ' +
-                  safeName +
-                  '">+</button>' +
-                "</div>" +
-              "</div>"
-            );
-          })
-          .join("");
+        items.forEach(function (entry) {
+          const line = createEl("div", "order-line");
+          const info = createEl("div", "order-line-info");
+          info.appendChild(createEl("strong", "", entry.product.name));
+          info.appendChild(
+            createEl(
+              "small",
+              "",
+              entry.qty + " × $" + entry.product.price + " = " + formatCurrency(entry.subtotal)
+            )
+          );
+          line.appendChild(info);
+          line.appendChild(createQtyControls(entry.product, entry.qty, true));
+          listEl.appendChild(line);
+        });
       }
     }
 
@@ -485,8 +459,7 @@
     if (mobileBar && mobileCount && mobileTotal) {
       if (totalCount > 0) {
         mobileBar.hidden = false;
-        mobileCount.textContent =
-          totalCount + (totalCount === 1 ? " producto" : " productos");
+        mobileCount.textContent = totalCount + (totalCount === 1 ? " producto" : " productos");
         mobileTotal.textContent = formatCurrency(totalAmount);
       } else {
         mobileBar.hidden = true;
@@ -494,12 +467,6 @@
     }
   }
 
-  /**
-   * DEMO-002: Establece una cantidad validando entero seguro, no negatividad y tope máximo
-   * @param {string} productId
-   * @param {number} targetQty
-   * @returns {{ ok: boolean, qty: number, reason: string }}
-   */
   function setProductQuantity(productId, targetQty) {
     const feedback = document.getElementById("order-feedback");
     const product = findProductById(productId);
@@ -509,16 +476,12 @@
     }
 
     if (typeof targetQty !== "number" || !Number.isSafeInteger(targetQty)) {
-      if (feedback) {
-        feedback.textContent = "La cantidad debe ser un número entero válido.";
-      }
+      if (feedback) feedback.textContent = "La cantidad debe ser un número entero válido.";
       return { ok: false, qty: orderState[productId] || 0, reason: "Cantidad no entera." };
     }
 
     if (targetQty < 0) {
-      if (feedback) {
-        feedback.textContent = "No se permiten cantidades negativas.";
-      }
+      if (feedback) feedback.textContent = "No se permiten cantidades negativas.";
       return { ok: false, qty: orderState[productId] || 0, reason: "Cantidad negativa." };
     }
 
@@ -544,9 +507,7 @@
       orderState[productId] = targetQty;
     }
 
-    if (feedback) {
-      feedback.textContent = "";
-    }
+    if (feedback) feedback.textContent = "";
 
     renderCatalog();
     renderOrderSummary();
@@ -573,16 +534,13 @@
           if (feedbackEl) feedbackEl.textContent = successMessage;
         })
         .catch(function () {
-          if (feedbackEl) {
-            feedbackEl.textContent = "Resumen listo en la vista previa superior.";
-          }
+          if (feedbackEl) feedbackEl.textContent = "Resumen listo en la vista previa superior.";
         });
     } else if (feedbackEl) {
       feedbackEl.textContent = "Resumen listo en la vista previa superior.";
     }
   }
 
-  // Exponer utilidades para pruebas de regresión y auditoría independiente
   window.KAZVORA_BAKERY_DEMO = {
     DEMO_CONFIG: DEMO_CONFIG,
     getOrderStateSnapshot: function () {
@@ -597,7 +555,6 @@
   };
 
   document.addEventListener("DOMContentLoaded", function () {
-    // DEMO-005: Configurar fecha mínima local en el selector de fecha
     const dateInput = document.getElementById("delivery-date");
     if (dateInput) {
       dateInput.setAttribute("min", getTodayLocalISO());
@@ -669,13 +626,10 @@
           return;
         }
 
-        // DEMO-005: Validar que la fecha no sea pasada antes de generar el pedido
         const rawDate = dateInput ? dateInput.value.trim() : "";
         const dateValidation = validateDeliveryDate(rawDate);
         if (!dateValidation.valid) {
-          if (feedback) {
-            feedback.textContent = dateValidation.reason;
-          }
+          if (feedback) feedback.textContent = dateValidation.reason;
           if (dateInput) dateInput.focus();
           return;
         }
@@ -683,7 +637,6 @@
         const message = buildWhatsAppMessage();
         const validPhone = validateWhatsAppPhone(DEMO_CONFIG.whatsappNumber);
 
-        // DEMO-003: Validar formato internacional antes de abrir enlace de WhatsApp
         if (validPhone) {
           const waUrl = "https://wa.me/" + validPhone + "?text=" + encodeURIComponent(message);
           let popupWindow = null;
@@ -732,18 +685,12 @@
         const rawDate = dateInput ? dateInput.value.trim() : "";
         const dateValidation = validateDeliveryDate(rawDate);
         if (!dateValidation.valid) {
-          if (feedback) {
-            feedback.textContent = dateValidation.reason;
-          }
+          if (feedback) feedback.textContent = dateValidation.reason;
           return;
         }
 
         const message = buildWhatsAppMessage();
-        copyTextToClipboard(
-          message,
-          feedback,
-          "✓ Resumen del pedido copiado al portapapeles."
-        );
+        copyTextToClipboard(message, feedback, "✓ Resumen del pedido copiado al portapapeles.");
       });
     }
   });

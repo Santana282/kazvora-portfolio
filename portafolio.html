@@ -1,22 +1,79 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0d10"><meta name="description" content="Explora las demostraciones y proyectos de KAZVORA Technologies.">
-  <title>Portafolio | KAZVORA Technologies</title><link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/styles.css">
-  <script src="js/projects.js" defer></script><script src="js/main.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="description" content="Explora los proyectos propios y demostraciones comerciales de KAZVORA Technologies.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="KAZVORA Technologies">
+  <meta property="og:title" content="Portafolio | KAZVORA Technologies">
+  <meta property="og:description" content="Registro transparente de proyectos, demostraciones comerciales y soluciones digitales de KAZVORA Technologies.">
+  <title>Portafolio | KAZVORA Technologies</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/projects.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
-  <header class="site-header"><a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio"><span class="brand-mark" aria-hidden="true">K<span>Z</span></span><span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span></a><button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú"><span></span><span></span><span></span></button><nav id="main-nav" class="main-nav" aria-label="Navegación principal"><a href="index.html">Inicio</a><a class="active" href="portafolio.html">Portafolio</a><a href="servicios.html">Servicios</a><a href="nosotros.html">Nosotros</a><a class="nav-contact" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a></nav></header>
+
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
+      <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
+      <span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span>
+    </a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a class="active" aria-current="page" href="portafolio.html">Portafolio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a class="nav-contact" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
   <main id="contenido">
-    <section class="page-hero section-wrap"><p class="eyebrow">TRABAJO EN PROGRESO, IDEAS EN MOVIMIENTO</p><h1>Nuestro <span class="gradient-text">portafolio.</span></h1><p>Un registro transparente de proyectos, experimentos y soluciones. Esta colección crecerá con cada trabajo terminado.</p></section>
-    <section class="section-wrap portfolio-section">
-      <div class="filter-row" id="project-filters" aria-label="Filtrar proyectos"></div>
-      <div id="all-projects" class="project-grid project-grid-wide" aria-live="polite"></div>
-      <p class="portfolio-note"><span class="status-dot"></span> Los proyectos marcados como demostración son ejemplos de capacidades, no trabajos atribuidos a clientes.</p>
+    <section class="page-hero section-wrap">
+      <p class="eyebrow">TRABAJO EN PROGRESO · IDEAS EN MOVIMIENTO</p>
+      <h1>Nuestro <span class="gradient-text">portafolio.</span></h1>
+      <p>Un registro transparente de proyectos propios, demostraciones funcionales y soluciones digitales. Esta colección crece con cada entrega validada.</p>
     </section>
-    <section class="section-wrap closing-cta"><div><p class="eyebrow">EL SIGUIENTE PROYECTO PUEDE SER EL TUYO</p><h2>¿Qué te gustaría <span class="gradient-text">construir?</span></h2></div><a class="button button-primary" href="contacto.html">Hablemos <span aria-hidden="true">↗</span></a></section>
+
+    <section class="section-wrap portfolio-section">
+      <div class="filter-row" id="project-filters" role="group" aria-label="Filtrar proyectos por categoría"></div>
+      <div id="all-projects" class="project-grid project-grid-wide" aria-live="polite"></div>
+      <p class="portfolio-note">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Los proyectos marcados como demostración son ejemplos funcionales de capacidades, no encargos atribuidos a clientes.</span>
+      </p>
+    </section>
+
+    <section class="section-wrap closing-cta">
+      <div>
+        <p class="eyebrow">EL SIGUIENTE PROYECTO PUEDE SER EL TUYO</p>
+        <h2>¿Qué te gustaría <span class="gradient-text">construir?</span></h2>
+      </div>
+      <a class="button button-primary" href="contacto.html">Hablemos <span aria-hidden="true">↗</span></a>
+    </section>
   </main>
-  <footer class="site-footer"><a class="brand footer-brand" href="index.html"><span class="brand-mark" aria-hidden="true">K<span>Z</span></span><span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span></a><p>Tecnología que convierte ideas en soluciones.</p><div class="footer-bottom"><span>© <span id="year"></span> KAZVORA Technologies</span><span>Construido con intención. Diseñado para crecer.</span></div></footer>
-</body></html>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
+      <span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span>
+    </a>
+    <p>Tecnología que convierte ideas en soluciones.</p>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> KAZVORA Technologies</span>
+      <span>Ideas que se convierten en soluciones.</span>
+    </div>
+  </footer>
+</body>
+</html>

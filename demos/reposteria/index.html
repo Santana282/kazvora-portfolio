@@ -3,18 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#1c1215">
   <meta name="description" content="Demostración comercial de catálogo digital y preparación de pedidos para repostería, desarrollada por KAZVORA Technologies.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="KAZVORA Technologies">
+  <meta property="og:title" content="Dulce Atelier — Repostería Artesanal | Demo KAZVORA Technologies">
+  <meta property="og:description" content="Catálogo interactivo demostrativo con armador de pedidos y resumen estructurado para WhatsApp.">
   <title>Dulce Atelier — Repostería Artesanal | Demo KAZVORA Technologies</title>
   <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../../assets/icons/favicon.svg">
   <link rel="stylesheet" href="styles.css">
+  <script src="../../js/config.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
 
-  <!-- Barra institucional de KAZVORA Technologies (con favicon.svg oficial) -->
   <div class="kazvora-demo-bar" role="region" aria-label="Aviso de demostración comercial">
     <div class="demo-bar-inner">
       <a class="kazvora-badge" href="../../index.html" aria-label="Volver a KAZVORA Technologies">
@@ -25,13 +32,12 @@
         Catálogo demostrativo con productos ficticios. No realiza cobros ni pedidos reales.
       </p>
       <div class="demo-bar-links">
-        <a href="../../portafolio.html">← Volver al portafolio</a>
-        <a class="demo-cta-quote" href="../../contacto.html">Cotizar un catálogo así ↗</a>
+        <a href="../../portafolio.html"><span aria-hidden="true">←</span> Volver al portafolio</a>
+        <a class="demo-cta-quote" href="../../contacto.html">Cotizar un catálogo así <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </div>
 
-  <!-- Encabezado propio de la marca demostrativa (Dulce Atelier) -->
   <header class="bakery-header">
     <div class="bakery-wrap header-row">
       <div class="bakery-brand">
@@ -52,7 +58,6 @@
   </header>
 
   <main>
-    <!-- Hero de la Repostería -->
     <section class="bakery-hero bakery-wrap">
       <div class="hero-content">
         <span class="demo-tag">PROYECTO DE DEMOSTRACIÓN · SECTOR GASTRONÓMICO</span>
@@ -61,7 +66,7 @@
           Explora nuestra vitrina digital, selecciona tus postres favoritos, personaliza la dedicatoria y genera tu solicitud de pedido lista para enviar por WhatsApp en segundos.
         </p>
         <div class="hero-buttons">
-          <a class="btn-bakery btn-bakery-primary" href="#catalogo">Explorar vitrina ↓</a>
+          <a class="btn-bakery btn-bakery-primary" href="#catalogo">Explorar vitrina <span aria-hidden="true">↓</span></a>
           <a class="btn-bakery btn-bakery-outline" href="#armar-pedido">Ver resumen de pedido</a>
         </div>
         <div class="hero-metrics">
@@ -89,7 +94,6 @@
       </div>
     </section>
 
-    <!-- Cómo funciona -->
     <section id="como-funciona" class="bakery-wrap steps-strip" aria-label="Pasos para preparar un pedido">
       <div class="step-item">
         <span class="step-num">01</span>
@@ -114,7 +118,6 @@
       </div>
     </section>
 
-    <!-- Catálogo y Armador de Pedido -->
     <section id="catalogo" class="bakery-wrap main-workspace">
       <div class="catalog-column">
         <div class="catalog-header">
@@ -128,7 +131,6 @@
         <div id="bakery-grid" class="bakery-grid" aria-live="polite"></div>
       </div>
 
-      <!-- Panel lateral / inferior de preparación de pedido -->
       <aside id="armar-pedido" class="order-panel" aria-label="Preparador de pedido">
         <div class="order-panel-header">
           <h2>Tu solicitud de pedido</h2>
@@ -173,7 +175,7 @@
 
           <div class="order-actions">
             <button type="submit" class="btn-bakery btn-whatsapp">
-              Preparar para WhatsApp <span>↗</span>
+              Preparar para WhatsApp <span aria-hidden="true">↗</span>
             </button>
             <button type="button" id="copy-order-btn" class="btn-bakery btn-copy">
               Copiar resumen
@@ -186,16 +188,14 @@
     </section>
   </main>
 
-  <!-- Barra móvil flotante para ir al pedido rápidamente -->
   <div id="mobile-order-bar" class="mobile-order-bar" hidden>
     <div>
       <strong id="mobile-bar-count">0 productos</strong>
       <span id="mobile-bar-total">$0 MXN</span>
     </div>
-    <a href="#armar-pedido" class="btn-bakery btn-bakery-primary">Revisar pedido ↓</a>
+    <a href="#armar-pedido" class="btn-bakery btn-bakery-primary">Revisar pedido <span aria-hidden="true">↓</span></a>
   </div>
 
-  <!-- Pie de página con atribución y favicon.svg de KAZVORA Technologies -->
   <footer class="bakery-footer">
     <div class="bakery-wrap footer-grid">
       <div class="footer-brand-info">
@@ -216,7 +216,7 @@
           <a href="../../index.html">Inicio corporativo</a>
           <a href="../../portafolio.html">Portafolio</a>
           <a href="../../servicios.html">Servicios</a>
-          <a href="../../contacto.html">Solicitar cotización ↗</a>
+          <a href="../../contacto.html">Solicitar cotización <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </div>
