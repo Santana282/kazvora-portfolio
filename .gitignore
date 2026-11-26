@@ -1,0 +1,20 @@
+# Entornos y secretos (NUNCA subir al repositorio)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+
+# Dependencias y artefactos temporales locales
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.zip
+KAZVORA_REPO_SNAPSHOT.md
+
+# Sistema operativo y editor
+.DS_Store
+Thumbs.db

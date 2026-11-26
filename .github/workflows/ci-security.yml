@@ -1,0 +1,28 @@
+name: KAZVORA CI & Security Checks
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automated-tests:
+    name: Suite de Seguridad y Regresión (Node.js 22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Ejecutar pruebas automatizadas DOM nativo y seguridad
+        run: node tests/run-fase4-audit-tests.js
