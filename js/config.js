@@ -1,5 +1,5 @@
 /**
- * KAZVORA Technologies — Configuración Pública de Entorno (js/config.js)
+ * KAZVORA Technologies — Configuración Pública de Entorno v2.2 (js/config.js)
  *
  * REGLA DE SEGURIDAD:
  * - Este archivo se entrega de forma pública al navegador.
@@ -18,6 +18,7 @@
     // Permanecen vacíos "" hasta autorización comercial explícita.
     whatsappNumber: "",
     demoBakeryWhatsappNumber: "",
+    demoClinicWhatsappNumber: "",
 
     // Parámetros operativos del frontend
     contactCooldownMs: 2500,

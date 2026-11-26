@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0f2937">
+  <meta name="description" content="Demostración comercial de sitio web y pre-agendado de citas para clínicas y servicios profesionales, desarrollada por KAZVORA Technologies.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="KAZVORA Technologies">
+  <meta property="og:title" content="Clínica Dental Nova — Agenda de Citas | Demo KAZVORA Technologies">
+  <meta property="og:description" content="Demostración funcional de pre-agendado de citas por especialidad, fecha y horario listo para WhatsApp.">
+  <title>Clínica Dental Nova — Agenda de Citas | Demo KAZVORA Technologies</title>
+  <link rel="icon" href="../../assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../assets/icons/favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="../../js/config.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#agendar">Saltar al agendado de cita</a>
+
+  <!-- Barra institucional de KAZVORA Technologies -->
+  <div class="kazvora-demo-bar" role="region" aria-label="Aviso de demostración comercial">
+    <div class="demo-bar-inner">
+      <a class="kazvora-badge" href="../../index.html" aria-label="Volver a KAZVORA Technologies">
+        <img src="../../assets/icons/favicon.svg" alt="" width="24" height="24">
+        <span><strong>KAZVORA</strong> TECHNOLOGIES · DEMO COMERCIAL #2</span>
+      </a>
+      <p class="demo-disclaimer">
+        Sitio demostrativo con servicios y precios ficticios. No agenda citas reales ni guarda expedientes médicos.
+      </p>
+      <div class="demo-bar-links">
+        <a href="../../portafolio.html"><span aria-hidden="true">←</span> Volver al portafolio</a>
+        <a class="demo-cta-quote" href="../../contacto.html">Cotizar un sitio así <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encabezado de marca demostrativa (Clínica Dental Nova) -->
+  <header class="clinic-header">
+    <div class="clinic-wrap header-row">
+      <a class="clinic-brand" href="#inicio" aria-label="Clínica Dental Nova, demostración">
+        <span class="clinic-logo-mark" aria-hidden="true">✚</span>
+        <div>
+          <strong>Clínica Dental Nova</strong>
+          <small>ODONTOLOGÍA INTEGRAL &amp; ESTÉTICA</small>
+        </div>
+      </a>
+      <nav class="clinic-nav" aria-label="Navegación de la demostración">
+        <a href="#tratamientos">Tratamientos</a>
+        <a href="#proceso">Cómo funciona</a>
+        <a href="#agendar" class="btn-clinic-nav">Pre-agendar cita</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="clinic-hero clinic-wrap">
+      <div class="hero-copy">
+        <span class="clinic-pill">DEMO SECTOR SALUD &amp; SERVICIOS PROFESIONALES</span>
+        <h1>Cuidamos tu sonrisa con <span class="text-teal">claridad, precisión y puntualidad.</span></h1>
+        <p class="hero-lead">
+          Elige el tratamiento que necesitas, selecciona el día y horario que mejor se adapte a tu rutina y genera tu solicitud de cita lista para confirmar por WhatsApp en menos de un minuto.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-clinic btn-clinic-primary" href="#agendar">Solicitar cita ahora <span aria-hidden="true">↓</span></a>
+          <a class="btn-clinic btn-clinic-secondary" href="#tratamientos">Ver tratamientos y tiempos</a>
+        </div>
+        <div class="clinic-trust-bar">
+          <div><strong>Lun – Sáb</strong><span>09:00 a 19:00 h (Demo)</span></div>
+          <div><strong>Sin registros largos</strong><span>Solicitud directa por WhatsApp</span></div>
+          <div><strong>100% Adaptable</strong><span>Diseño claro para pacientes</span></div>
+        </div>
+      </div>
+
+      <div class="hero-card" aria-hidden="true">
+        <div class="hero-card-header">
+          <span class="pulse-dot"></span>
+          <span>Módulo de Pre-Agendado Digital</span>
+        </div>
+        <div class="hero-card-body">
+          <div class="mock-slot-row">
+            <span>Tratamiento</span>
+            <strong>Valoración y Limpieza</strong>
+          </div>
+          <div class="mock-slot-row">
+            <span>Duración estimada</span>
+            <strong>45 minutos</strong>
+          </div>
+          <div class="mock-slot-row">
+            <span>Horarios sugeridos</span>
+            <div class="mock-chips">
+              <span>10:00</span>
+              <span class="mock-chip-active">12:00</span>
+              <span>17:00</span>
+            </div>
+          </div>
+          <div class="mock-status-note">
+            La disponibilidad real se confirma directamente con recepción vía WhatsApp.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proceso" class="clinic-wrap steps-grid" aria-label="Pasos para solicitar una cita">
+      <article class="step-card">
+        <span class="step-badge">01</span>
+        <h3>Selecciona el servicio</h3>
+        <p>Consulta la duración estimada y el costo orientativo de cada valoración o tratamiento de muestra.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-badge">02</span>
+        <h3>Elige fecha y horario</h3>
+        <p>El calendario bloquea fechas pasadas y domingos automáticamente, ofreciendo bloques horarios claros.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-badge">03</span>
+        <h3>Confirma por WhatsApp</h3>
+        <p>Se prepara un mensaje ordenado con tus datos para que recepción confirme tu espacio sin idas y vueltas.</p>
+      </article>
+    </section>
+
+    <section id="tratamientos" class="clinic-wrap booking-layout">
+      <div class="services-column">
+        <div class="section-head">
+          <p class="kicker">ESPECIALIDADES DE MUESTRA</p>
+          <h2>Elige un tratamiento <span class="demo-chip">DEMO</span></h2>
+          <p>Haz clic en cualquier tarjeta para seleccionarla automáticamente en el formulario de solicitud.</p>
+        </div>
+
+        <div id="clinic-filters" class="clinic-filters" role="group" aria-label="Filtrar tratamientos por área"></div>
+        <div id="clinic-services-grid" class="services-grid" aria-live="polite"></div>
+      </div>
+
+      <aside id="agendar" class="booking-panel" aria-label="Formulario de pre-agendado de cita">
+        <div class="booking-panel-head">
+          <h2>Solicitar cita</h2>
+          <span class="no-charge-badge">Sin cobro en línea</span>
+        </div>
+
+        <div id="selected-service-box" class="selected-service-box" aria-live="polite"></div>
+
+        <form id="clinic-booking-form" class="booking-form" novalidate>
+          <label for="patient-name">Nombre del paciente *</label>
+          <input id="patient-name" name="patient-name" type="text" minlength="2" maxlength="80" required placeholder="Ej. Mariana López">
+
+          <div class="two-cols">
+            <div>
+              <label for="visit-type">Tipo de paciente</label>
+              <select id="visit-type" name="visit-type">
+                <option value="Primera vez">Primera vez</option>
+                <option value="Paciente recurrente">Paciente recurrente</option>
+              </select>
+            </div>
+            <div>
+              <label for="appointment-date">Fecha preferida *</label>
+              <input id="appointment-date" name="appointment-date" type="date" required>
+            </div>
+          </div>
+
+          <div class="slots-field">
+            <span class="field-label">Horario preferido *</span>
+            <div id="time-slots-grid" class="time-slots-grid" role="group" aria-label="Seleccionar horario preferido"></div>
+          </div>
+
+          <label for="patient-notes">Motivo breve o comentarios (opcional)</label>
+          <textarea id="patient-notes" name="patient-notes" rows="2" maxlength="250" placeholder="Ej. Molestia leve en muela superior, prefiero cita vespertina..."></textarea>
+
+          <div class="preview-box">
+            <span class="preview-title">Vista previa del mensaje para WhatsApp:</span>
+            <pre id="clinic-whatsapp-preview" class="whatsapp-preview"></pre>
+          </div>
+
+          <div class="booking-actions">
+            <button type="submit" class="btn-clinic btn-whatsapp">
+              Enviar solicitud por WhatsApp <span aria-hidden="true">↗</span>
+            </button>
+            <button type="button" id="copy-booking-btn" class="btn-clinic btn-copy">
+              Copiar solicitud
+            </button>
+          </div>
+
+          <p id="booking-feedback" class="booking-feedback" aria-live="polite"></p>
+        </form>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="clinic-footer">
+    <div class="clinic-wrap footer-grid">
+      <div class="footer-note">
+        <strong>Clínica Dental Nova · Demostración Comercial #2</strong>
+        <p>
+          Interfaz demostrativa diseñada y programada por <strong>KAZVORA Technologies</strong> para mostrar cómo consultorios médicos, dentales, spas, barberías o despachos pueden captar solicitudes de citas ordenadas sin depender de plataformas costosas. No almacena información clínica ni confirma citas reales.
+        </p>
+      </div>
+      <div class="kazvora-card">
+        <div class="kazvora-card-brand">
+          <img src="../../assets/icons/favicon.svg" alt="Logotipo KAZVORA Technologies" width="34" height="34">
+          <div>
+            <strong>KAZVORA TECHNOLOGIES</strong>
+            <small>Ideas que se convierten en soluciones.</small>
+          </div>
+        </div>
+        <div class="kazvora-card-links">
+          <a href="../../index.html">Inicio</a>
+          <a href="../../portafolio.html">Portafolio</a>
+          <a href="../../servicios.html">Servicios</a>
+          <a href="../../contacto.html">Cotizar solución <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

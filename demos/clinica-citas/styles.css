@@ -1,0 +1,882 @@
+/* ==========================================================================
+   Demostración Comercial #2: Clínica Dental Nova (demos/clinica-citas/styles.css)
+   Desarrollado por KAZVORA Technologies
+   Identidad visual clara, clínica y profesional (contraste con la demo oscura)
+   ========================================================================== */
+
+:root {
+  --clinic-bg: #f4f8fb;
+  --clinic-surface: #ffffff;
+  --clinic-surface-soft: #eaf3f7;
+  --clinic-navy: #0f2937;
+  --clinic-ink: #1e3746;
+  --clinic-muted: #526b7a;
+  --clinic-teal: #0b8a8f;
+  --clinic-teal-dark: #086b6f;
+  --clinic-teal-soft: rgba(11, 138, 143, 0.1);
+  --clinic-border: #d7e4ec;
+  --clinic-green: #1fa855;
+  --clinic-error: #c92a2a;
+
+  --kazvora-bg: #0b0d10;
+  --kazvora-red: #ff454f;
+  --kazvora-blue: #83ddff;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow-card: 0 14px 36px rgba(15, 41, 55, 0.08);
+  --max-width: 1200px;
+  --transition: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--clinic-bg);
+  color: var(--clinic-navy);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 999;
+  background: var(--clinic-teal);
+  color: #ffffff;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--clinic-teal);
+  outline-offset: 3px;
+}
+
+.clinic-wrap {
+  width: min(100% - 2rem, var(--max-width));
+  margin-inline: auto;
+}
+
+/* 1. Barra Institucional Superior KAZVORA */
+.kazvora-demo-bar {
+  background: var(--kazvora-bg);
+  border-bottom: 1px solid rgba(131, 221, 255, 0.24);
+  font-size: 0.8rem;
+  padding: 0.6rem 1rem;
+  color: #f4f7fb;
+}
+
+.demo-bar-inner {
+  width: min(100%, var(--max-width));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.kazvora-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
+.kazvora-badge img {
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.kazvora-badge strong {
+  color: var(--kazvora-red);
+}
+
+.demo-disclaimer {
+  color: #a4b0be;
+}
+
+.demo-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.demo-bar-links a {
+  color: var(--kazvora-blue);
+  font-weight: 600;
+}
+
+.demo-bar-links a.demo-cta-quote {
+  background: rgba(255, 69, 79, 0.18);
+  border: 1px solid rgba(255, 69, 79, 0.45);
+  color: #ffffff;
+  padding: 0.28rem 0.8rem;
+  border-radius: var(--radius-pill);
+}
+
+.demo-bar-links a.demo-cta-quote:hover {
+  background: var(--kazvora-red);
+}
+
+/* 2. Header de Clínica Dental Nova */
+.clinic-header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--clinic-border);
+  padding-block: 0.9rem;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.clinic-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clinic-logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--clinic-teal), var(--clinic-navy));
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.clinic-brand strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--clinic-navy);
+}
+
+.clinic-brand small {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--clinic-teal);
+}
+
+.clinic-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  font-size: 0.92rem;
+}
+
+.clinic-nav a {
+  color: var(--clinic-muted);
+  font-weight: 600;
+}
+
+.clinic-nav a:hover {
+  color: var(--clinic-navy);
+}
+
+.btn-clinic-nav {
+  background: var(--clinic-teal);
+  color: #ffffff !important;
+  padding: 0.5rem 1.05rem;
+  border-radius: var(--radius-pill);
+}
+
+.btn-clinic-nav:hover {
+  background: var(--clinic-teal-dark);
+}
+
+/* 3. Hero */
+.clinic-hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.75rem;
+  align-items: center;
+  padding-block: 3.8rem 2.8rem;
+}
+
+.clinic-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.12em;
+  color: var(--clinic-teal-dark);
+  background: var(--clinic-teal-soft);
+  border: 1px solid rgba(11, 138, 143, 0.25);
+  padding: 0.32rem 0.8rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: 1rem;
+}
+
+.clinic-hero h1 {
+  font-size: clamp(2.1rem, 4.3vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.1rem;
+}
+
+.text-teal {
+  color: var(--clinic-teal);
+}
+
+.hero-lead {
+  color: var(--clinic-muted);
+  font-size: 1.05rem;
+  max-width: 56ch;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.85rem;
+}
+
+.btn-clinic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.82rem 1.4rem;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.btn-clinic:hover {
+  transform: translateY(-2px);
+}
+
+.btn-clinic-primary {
+  background: var(--clinic-teal);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(11, 138, 143, 0.24);
+}
+
+.btn-clinic-primary:hover {
+  background: var(--clinic-teal-dark);
+}
+
+.btn-clinic-secondary {
+  background: var(--clinic-surface);
+  border-color: var(--clinic-border);
+  color: var(--clinic-navy);
+}
+
+.btn-clinic-secondary:hover {
+  border-color: var(--clinic-teal);
+}
+
+.clinic-trust-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2.2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--clinic-border);
+}
+
+.clinic-trust-bar strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--clinic-navy);
+}
+
+.clinic-trust-bar span {
+  font-size: 0.8rem;
+  color: var(--clinic-muted);
+}
+
+.hero-card {
+  background: var(--clinic-surface);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.hero-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.4rem;
+  background: var(--clinic-navy);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #38d9a9;
+}
+
+.hero-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mock-slot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px dashed var(--clinic-border);
+  font-size: 0.9rem;
+}
+
+.mock-slot-row span {
+  color: var(--clinic-muted);
+}
+
+.mock-chips {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.mock-chips span {
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  background: var(--clinic-surface-soft);
+  color: var(--clinic-navy);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.mock-chips .mock-chip-active {
+  background: var(--clinic-teal);
+  color: #ffffff;
+}
+
+.mock-status-note {
+  font-size: 0.82rem;
+  color: var(--clinic-muted);
+  background: var(--clinic-bg);
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+}
+
+/* 4. Pasos */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.step-card {
+  background: var(--clinic-surface);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--radius-md);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.step-badge {
+  align-self: flex-start;
+  font-size: 0.76rem;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--clinic-teal-dark);
+  background: var(--clinic-teal-soft);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.step-card p {
+  font-size: 0.88rem;
+  color: var(--clinic-muted);
+}
+
+/* 5. Área principal: Tratamientos + Panel de cita */
+.booking-layout {
+  display: grid;
+  grid-template-columns: 1fr 415px;
+  gap: 2rem;
+  align-items: start;
+  margin-bottom: 4.5rem;
+}
+
+.kicker {
+  font-size: 0.74rem;
+  font-weight: 800;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.14em;
+  color: var(--clinic-teal);
+  margin-bottom: 0.4rem;
+}
+
+.section-head h2 {
+  font-size: clamp(1.6rem, 3vw, 2.15rem);
+  margin-bottom: 0.4rem;
+}
+
+.section-head p {
+  color: var(--clinic-muted);
+  font-size: 0.94rem;
+  margin-bottom: 1.25rem;
+}
+
+.demo-chip {
+  font-size: 0.7rem;
+  vertical-align: middle;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: var(--clinic-teal-soft);
+  color: var(--clinic-teal-dark);
+}
+
+.clinic-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.clinic-filter-btn {
+  padding: 0.48rem 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--clinic-surface);
+  border: 1px solid var(--clinic-border);
+  color: var(--clinic-muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.clinic-filter-btn:hover,
+.clinic-filter-btn.active {
+  background: var(--clinic-navy);
+  border-color: var(--clinic-navy);
+  color: #ffffff;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 1.2rem;
+}
+
+.treatment-card {
+  background: var(--clinic-surface);
+  border: 2px solid var(--clinic-border);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.treatment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.treatment-card.is-selected {
+  border-color: var(--clinic-teal);
+  background: linear-gradient(180deg, #ffffff, #f0fafa);
+  box-shadow: 0 12px 30px rgba(11, 138, 143, 0.14);
+}
+
+.treatment-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.treatment-cat {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--clinic-teal-dark);
+  background: var(--clinic-teal-soft);
+  padding: 0.2rem 0.58rem;
+  border-radius: var(--radius-pill);
+}
+
+.treatment-duration {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--clinic-muted);
+}
+
+.treatment-card h3 {
+  font-size: 1.06rem;
+  color: var(--clinic-navy);
+}
+
+.treatment-desc {
+  font-size: 0.87rem;
+  color: var(--clinic-muted);
+  flex: 1;
+}
+
+.treatment-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--clinic-border);
+}
+
+.treatment-price {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--clinic-navy);
+}
+
+.select-treatment-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--clinic-teal);
+  background: transparent;
+  color: var(--clinic-teal-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.select-treatment-btn:hover,
+.treatment-card.is-selected .select-treatment-btn {
+  background: var(--clinic-teal);
+  color: #ffffff;
+}
+
+/* 6. Panel de pre-agendado */
+.booking-panel {
+  position: sticky;
+  top: 5rem;
+  background: var(--clinic-surface);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--radius-lg);
+  padding: 1.55rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.booking-panel-head h2 {
+  font-size: 1.25rem;
+}
+
+.no-charge-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--clinic-teal-dark);
+  background: var(--clinic-teal-soft);
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--radius-pill);
+}
+
+.selected-service-box {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--clinic-bg);
+  border: 1px solid var(--clinic-border);
+  font-size: 0.86rem;
+}
+
+.selected-service-box strong {
+  display: block;
+  color: var(--clinic-navy);
+  font-size: 0.95rem;
+}
+
+.selected-service-box span {
+  color: var(--clinic-muted);
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.booking-form label,
+.field-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--clinic-ink);
+  margin-bottom: 0.25rem;
+}
+
+.booking-form input,
+.booking-form select,
+.booking-form textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: var(--clinic-bg);
+  border: 1px solid var(--clinic-border);
+  color: var(--clinic-navy);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.booking-form input:focus,
+.booking-form select:focus,
+.booking-form textarea:focus {
+  outline: none;
+  border-color: var(--clinic-teal);
+  background: #ffffff;
+}
+
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+
+.slot-btn {
+  padding: 0.48rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid var(--clinic-border);
+  background: var(--clinic-surface);
+  color: var(--clinic-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.slot-btn:hover {
+  border-color: var(--clinic-teal);
+}
+
+.slot-btn.active {
+  background: var(--clinic-teal);
+  border-color: var(--clinic-teal);
+  color: #ffffff;
+}
+
+.preview-box {
+  background: var(--clinic-bg);
+  border: 1px solid var(--clinic-border);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem;
+}
+
+.preview-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--clinic-teal-dark);
+  margin-bottom: 0.35rem;
+}
+
+.whatsapp-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  color: var(--clinic-muted);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.booking-actions {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.btn-whatsapp {
+  background: var(--clinic-green);
+  color: #ffffff;
+}
+
+.btn-whatsapp:hover {
+  background: #1b944a;
+}
+
+.btn-copy {
+  background: var(--clinic-surface-soft);
+  border-color: var(--clinic-border);
+  color: var(--clinic-navy);
+}
+
+.booking-feedback {
+  font-size: 0.84rem;
+  font-weight: 600;
+  min-height: 1.25rem;
+  color: var(--clinic-teal-dark);
+}
+
+.booking-feedback.is-error {
+  color: var(--clinic-error);
+}
+
+/* 7. Footer KAZVORA */
+.clinic-footer {
+  margin-top: auto;
+  background: var(--kazvora-bg);
+  color: #f4f7fb;
+  padding-block: 2.6rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.footer-note p {
+  font-size: 0.88rem;
+  color: #a4b0be;
+  margin-top: 0.45rem;
+}
+
+.kazvora-card {
+  background: #11151b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 1.3rem;
+}
+
+.kazvora-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.kazvora-card-brand img {
+  border-radius: 8px;
+}
+
+.kazvora-card-brand strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.kazvora-card-brand small {
+  font-size: 0.75rem;
+  color: var(--kazvora-blue);
+}
+
+.kazvora-card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  font-size: 0.84rem;
+}
+
+.kazvora-card-links a {
+  color: var(--kazvora-blue);
+  font-weight: 600;
+}
+
+/* 8. Responsive */
+@media (max-width: 980px) {
+  .clinic-hero,
+  .booking-layout,
+  .steps-grid,
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .demo-disclaimer,
+  .clinic-nav a:not(.btn-clinic-nav) {
+    display: none;
+  }
+
+  .clinic-trust-bar,
+  .two-cols,
+  .booking-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
