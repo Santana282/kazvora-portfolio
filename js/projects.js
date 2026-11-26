@@ -1,8 +1,8 @@
 /**
- * KAZVORA Technologies — Fuente de datos oficial y validador de esquema del portafolio
- * Intervención Técnica Fase 4:
- * - PROJECTS-001: Sincronización honesta del registro que dirige a servicios.html
- * - PROJECTS-002: Validación nativa de esquema (IDs únicos, campos obligatorios, categorías, URLs y booleanos)
+ * KAZVORA Technologies — Fuente de datos oficial y validador de esquema del portafolio v2.2
+ * - Política positiva de validación de URLs (HTTP, HTTPS y rutas relativas limpias)
+ * - Validación nativa de esquema (IDs únicos, campos obligatorios, categorías, URLs y booleanos)
+ * - Incluye Demostración Comercial #1 (Repostería) y Demostración Comercial #2 (Agenda de Citas)
  */
 (function () {
   "use strict";
@@ -16,28 +16,19 @@
   ];
   const ALLOWED_THEMES = ["red", "blue", "pink"];
 
-  /**
-   * Valida que una URL de proyecto sea vacía, una ruta relativa segura o HTTP/HTTPS válido.
-   * Rechaza javascript:, data:, vbscript:, esquemas desconocidos y URLs protocol-relative (//).
-   * @param {string} rawUrl
-   * @returns {string|null} URL limpia o null si es inválida/peligrosa
-   */
   function validateProjectUrl(rawUrl) {
     if (typeof rawUrl !== "string") return null;
     const trimmed = rawUrl.trim();
     if (trimmed === "") return "";
 
-    // Rechazar caracteres de control, espacios internos o caracteres que rompan atributos
     if (/[\u0000-\u001F\u007F\s"'<>`]/.test(trimmed)) {
       return null;
     }
 
-    // Rechazar URLs protocol-relative (//dominio.com o \\dominio.com)
     if (trimmed.startsWith("//") || trimmed.startsWith("\\\\") || trimmed.includes("\\")) {
       return null;
     }
 
-    // Comprobar si declara un esquema de protocolo (ej. http:, https:, javascript:, data:, vbscript:)
     const schemeMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
     if (schemeMatch) {
       const scheme = schemeMatch[1].toLowerCase();
@@ -55,12 +46,10 @@
       }
     }
 
-    // Si no tiene esquema, no debe contener ':' en ningún punto de la ruta relativa
     if (trimmed.includes(":")) {
       return null;
     }
 
-    // Validar estructura de ruta relativa segura (sin atravesar fuera de raíz con ..al inicio si no corresponde)
     const relativePattern =
       /^(?:\.\/)?[a-zA-Z0-9._-]+(?:\/[a-zA-Z0-9._-]+)*(?:\?[a-zA-Z0-9=&._-]+)?(?:#[a-zA-Z0-9._-]+)?$/;
     if (!relativePattern.test(trimmed) || trimmed.includes("..")) {
@@ -70,11 +59,6 @@
     return trimmed;
   }
 
-  /**
-   * Valida y filtra la colección de proyectos garantizando integridad de esquema (PROJECTS-002)
-   * @param {Array} rawProjects
-   * @returns {Array} Lista de proyectos válidos e inmutables
-   */
   function validateKazvoraProjects(rawProjects) {
     if (!Array.isArray(rawProjects)) {
       console.warn("[KAZVORA] window.KAZVORA_PROJECTS no es un arreglo válido.");
@@ -109,13 +93,8 @@
         return;
       }
 
-      if (!title) {
-        console.warn("[KAZVORA] Proyecto '" + id + "' descartado: título vacío.");
-        return;
-      }
-
-      if (!description) {
-        console.warn("[KAZVORA] Proyecto '" + id + "' descartado: descripción vacía.");
+      if (!title || !description) {
+        console.warn("[KAZVORA] Proyecto '" + id + "' descartado: título o descripción vacíos.");
         return;
       }
 
@@ -176,8 +155,8 @@
       category: "Web",
       status: "Proyecto propio",
       description:
-        "Sitio multipágina con arquitectura ligera, diseño adaptable, filtros dinámicos de portafolio y generador de consultas comerciales.",
-      technologies: ["HTML5", "CSS3", "JavaScript", "GitHub Pages"],
+        "Sitio multipágina con arquitectura ligera, diseño adaptable, seguridad anti-XSS sin innerHTML, CSP estricta y filtros dinámicos.",
+      technologies: ["HTML5", "CSS3", "JavaScript", "CSP"],
       icon: "</>",
       theme: "red",
       featured: true,
@@ -189,7 +168,7 @@
       category: "Catálogo digital",
       status: "Demostración",
       description:
-        "Demostración comercial para repostería y pastelería artesanal con vitrina filtrable, armador de pedido interactivo y resumen listo para WhatsApp.",
+        "Demostración comercial para repostería artesanal con vitrina filtrable, armador de pedido interactivo y resumen listo para WhatsApp.",
       technologies: ["HTML5", "CSS3", "JavaScript", "WhatsApp Link"],
       icon: "▦",
       theme: "pink",
@@ -197,16 +176,29 @@
       url: "demos/reposteria/index.html"
     },
     {
+      id: "demo-clinica-citas",
+      title: "Clínica Dental Nova — Agenda de Citas",
+      category: "Web",
+      status: "Demostración",
+      description:
+        "Demostración comercial para consultorios y servicios profesionales: selección de especialidad, fecha hábil, horarios y solicitud estructurada por WhatsApp.",
+      technologies: ["HTML5", "CSS3", "JavaScript", "Diseño Claro"],
+      icon: "✚",
+      theme: "blue",
+      featured: true,
+      url: "demos/clinica-citas/index.html"
+    },
+    {
       id: "kazvora-catalogo-servicios",
       title: "Catálogo Institucional de Servicios KAZVORA",
       category: "Web",
       status: "Proyecto propio",
       description:
-        "Presentación estructurada de nuestra oferta comercial: definición clara de alcances, distinción entre servicios activos y áreas futuras, y flujo hacia contacto.",
+        "Presentación estructurada de nuestra oferta comercial y hoja de ruta en cinco verticales tecnológicas con total transparencia.",
       technologies: ["HTML5", "CSS3", "Diseño Responsive"],
       icon: "↗",
       theme: "blue",
-      featured: true,
+      featured: false,
       url: "servicios.html"
     },
     {
@@ -224,7 +216,6 @@
     }
   ];
 
-  // Exponer utilidades de validación y datos validados en window
   window.KAZVORA_SCHEMA = {
     validateProjectUrl: validateProjectUrl,
     validateKazvoraProjects: validateKazvoraProjects,
