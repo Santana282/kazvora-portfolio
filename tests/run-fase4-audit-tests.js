@@ -1,10 +1,12 @@
 /**
- * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.1 (Node.js 22+)
+ * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.1.1 (Node.js 22+)
  * Archivo: tests/run-fase4-audit-tests.js
  *
- * Sincronizada con la arquitectura DOM nativa (cero innerHTML en main.js y demos/reposteria/app.js).
- * Ejecutar desde la raíz del proyecto:
- *   node tests/run-fase4-audit-tests.js
+ * Correcciones v2.1.1:
+ * - Usa Object.defineProperty(global, 'navigator', ...) para compatibilidad real con Node.js 21/22+,
+ *   donde globalThis.navigator es un getter nativo de solo lectura.
+ * - Incluye detalle diagnóstico en cualquier fallo futuro.
+ * - Detecta y valida automáticamente demos/clinica-citas/ cuando exista en el repositorio.
  */
 
 const fs = require('fs');
@@ -90,7 +92,11 @@ function createNativeMockDOM() {
     'order-total-amount', 'header-item-count', 'whatsapp-preview',
     'mobile-order-bar', 'mobile-bar-count', 'mobile-bar-total',
     'bakery-order-form', 'order-feedback', 'copy-order-btn',
-    'customer-name', 'delivery-mode', 'cake-notes'
+    'customer-name', 'delivery-mode', 'cake-notes',
+    'clinic-filters', 'clinic-services-grid', 'selected-service-box',
+    'clinic-booking-form', 'patient-name', 'visit-type', 'appointment-date',
+    'time-slots-grid', 'patient-notes', 'clinic-whatsapp-preview',
+    'copy-booking-btn', 'booking-feedback'
   ].forEach(id => makeEl('div', id));
 
   const menuToggle = makeEl('button', 'menu-toggle-btn');
@@ -133,25 +139,32 @@ async function runSuite() {
   global.window = global;
   global.document = documentMock;
   global.innerWidth = 1024;
-  global.navigator = {
-    clipboard: {
-      writeText(text) {
-        if (clipboardMode === 'reject') {
-          return Promise.reject(new Error('Clipboard blocked'));
+
+  // En Node.js 21/22+, global.navigator es un getter nativo de solo lectura;
+  // Object.defineProperty permite sobrescribirlo de forma confiable en pruebas.
+  Object.defineProperty(global, 'navigator', {
+    value: {
+      clipboard: {
+        writeText(text) {
+          if (clipboardMode === 'reject') {
+            return Promise.reject(new Error('Clipboard blocked'));
+          }
+          if (clipboardMode === 'deferred') {
+            return new Promise(resolve => {
+              deferredResolve = () => {
+                lastClipboardText = text;
+                resolve();
+              };
+            });
+          }
+          lastClipboardText = text;
+          return Promise.resolve();
         }
-        if (clipboardMode === 'deferred') {
-          return new Promise(resolve => {
-            deferredResolve = () => {
-              lastClipboardText = text;
-              resolve();
-            };
-          });
-        }
-        lastClipboardText = text;
-        return Promise.resolve();
       }
-    }
-  };
+    },
+    writable: true,
+    configurable: true
+  });
 
   global.window.open = function () {
     if (simulatePopupBlocked) {
@@ -163,16 +176,28 @@ async function runSuite() {
   };
 
   const baseDir = path.resolve(__dirname, '..');
+  const clinicAppPath = path.join(baseDir, 'demos', 'clinica-citas', 'app.js');
+  const hasClinicDemo = fs.existsSync(clinicAppPath);
+
   require(path.join(baseDir, 'js', 'config.js'));
   require(path.join(baseDir, 'js', 'projects.js'));
   require(path.join(baseDir, 'js', 'main.js'));
   require(path.join(baseDir, 'demos', 'reposteria', 'app.js'));
+  if (hasClinicDemo) {
+    require(clinicAppPath);
+  }
 
   documentMock.triggerDOMContentLoaded();
 
   const results = [];
   function test(id, group, desc, passed, detail = '') {
-    results.push({ id, group, description: desc, status: passed ? 'PASS' : 'FAIL', detail: passed ? null : detail });
+    results.push({
+      id,
+      group,
+      description: desc,
+      status: passed ? 'PASS' : 'FAIL',
+      detail: passed ? null : (detail || 'Condición de prueba no cumplida')
+    });
   }
 
   const u = window.KAZVORA_MAIN_UTILS;
@@ -182,14 +207,40 @@ async function runSuite() {
   // 1. Arquitectura y Seguridad Anti-XSS (cero innerHTML ejecutable)
   const mainSrc = fs.readFileSync(path.join(baseDir, 'js', 'main.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
   const appSrc = fs.readFileSync(path.join(baseDir, 'demos', 'reposteria', 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  test('SEC-DOM-01', 'XSS', 'js/main.js y demos/reposteria/app.js operan con 0 usos de innerHTML', !mainSrc.includes('innerHTML') && !appSrc.includes('innerHTML'));
-  test('ENV-01', 'Config', 'window.KAZVORA_ENV existe, está congelado y sin números ficticios', Boolean(window.KAZVORA_ENV && Object.isFrozen(window.KAZVORA_ENV) && window.KAZVORA_ENV.whatsappNumber === ''));
+  const clinicSrc = hasClinicDemo
+    ? fs.readFileSync(clinicAppPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+    : '';
+
+  test(
+    'SEC-DOM-01',
+    'XSS',
+    'Los controladores JS operan con 0 usos de innerHTML',
+    !mainSrc.includes('innerHTML') && !appSrc.includes('innerHTML') && !clinicSrc.includes('innerHTML'),
+    'Se detectó uso de innerHTML en código ejecutable'
+  );
+
+  test(
+    'ENV-01',
+    'Config',
+    'window.KAZVORA_ENV existe, está congelado y sin números ficticios',
+    Boolean(window.KAZVORA_ENV && Object.isFrozen(window.KAZVORA_ENV) && window.KAZVORA_ENV.whatsappNumber === '')
+  );
 
   const htmlPages = ['index.html', 'portafolio.html', 'servicios.html', 'nosotros.html', 'contacto.html', 'demos/reposteria/index.html'];
-  test('SEC-CSP-01', 'CSP', 'Las 6 páginas HTML declaran Content-Security-Policy y Referrer-Policy', htmlPages.every(p => {
+  if (hasClinicDemo && fs.existsSync(path.join(baseDir, 'demos', 'clinica-citas', 'index.html'))) {
+    htmlPages.push('demos/clinica-citas/index.html');
+  }
+  const missingCsp = htmlPages.filter(p => {
     const html = fs.readFileSync(path.join(baseDir, p), 'utf8');
-    return html.includes('http-equiv="Content-Security-Policy"') && html.includes('name="referrer"');
-  }));
+    return !(html.includes('http-equiv="Content-Security-Policy"') && html.includes('name="referrer"'));
+  });
+  test(
+    'SEC-CSP-01',
+    'CSP',
+    'Todas las páginas HTML declaran Content-Security-Policy y Referrer-Policy',
+    missingCsp.length === 0,
+    'Falta CSP o Referrer en: ' + missingCsp.join(', ')
+  );
 
   // 2. Validación positiva de URLs (MAIN-001)
   test('URL-01', 'MAIN-001', 'Acepta HTTPS, HTTP y ruta relativa limpia', u.validateSafeUrl('https://kazvora.com') === 'https://kazvora.com' && u.validateSafeUrl('http://example.com') === 'http://example.com' && u.validateSafeUrl('demos/reposteria/index.html') === 'demos/reposteria/index.html');
@@ -240,14 +291,20 @@ async function runSuite() {
   await flushAsync();
   const fallbackOk = fb.className.includes('is-success') && fb.textContent.includes('cópialo manualmente');
   clipboardMode = 'resolve';
-  test('FORM-03', 'Asíncrono', 'Portapapeles asíncrono sin falso positivo y respaldo ante rechazo', pendingOk && resolvedOk && fallbackOk);
+  test(
+    'FORM-03',
+    'Asíncrono',
+    'Portapapeles asíncrono sin falso positivo y respaldo ante rechazo',
+    pendingOk && resolvedOk && fallbackOk,
+    JSON.stringify({ pendingOk, resolvedOk, fallbackOk, feedback: fb.textContent })
+  );
 
   u.CONFIG.contactCooldownMs = 5000;
   form.dispatchEvent('submit', { preventDefault() {} });
   test('FORM-04', 'Anti-Abuso', 'Cooldown detiene doble envío inmediato', fb.className.includes('is-error') && fb.textContent.includes('Espera un momento'));
   u.CONFIG.contactCooldownMs = origCooldown;
 
-  // 5. Demostración Repostería
+  // 5. Demostración #1: Repostería
   test('DEMO-01', 'Repostería', 'Carrito inicia vacío (0 productos y $0 MXN)', d.getSelectedItems().length === 0 && elementsById['header-item-count'].textContent === '0');
   test('DEMO-02', 'Repostería', 'Límites de cantidad: acepta 1 y 10; rechaza 11, -1, 2.5 y NaN',
     d.setProductQuantity('pastel-red-velvet', 1).ok &&
@@ -287,17 +344,60 @@ async function runSuite() {
   d.setProductQuantity('pastel-red-velvet', 1);
   elementsById['customer-name'].value = 'Sofía Hernández';
   elementsById['delivery-date'].value = today;
+
   simulatePopupBlocked = false;
   elementsById['bakery-order-form'].dispatchEvent('submit', { preventDefault() {} });
   await flushAsync();
   const popOk = lastCreatedPopup !== null && lastCreatedPopup.opener === null;
+
   simulatePopupBlocked = true;
   elementsById['bakery-order-form'].dispatchEvent('submit', { preventDefault() {} });
   await flushAsync();
-  const popBlockedOk = lastCreatedPopup === null && elementsById['order-feedback'].textContent.includes('bloqueó la ventana emergente');
+  const popBlockedFeedback = elementsById['order-feedback'].textContent;
+  const popBlockedOk = lastCreatedPopup === null && popBlockedFeedback.includes('bloqueó la ventana emergente');
+
   d.DEMO_CONFIG.whatsappNumber = '';
   d.setProductQuantity('pastel-red-velvet', 0);
-  test('DEMO-07', 'Popups', 'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups', popOk && popBlockedOk);
+  elementsById['customer-name'].value = '';
+  elementsById['delivery-date'].value = '';
+
+  test(
+    'DEMO-07',
+    'Popups',
+    'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups',
+    popOk && popBlockedOk,
+    JSON.stringify({ popOk, popBlockedOk, popBlockedFeedback })
+  );
+
+  // 6. Demostración #2: Clínica Dental (si ya existe en el repositorio)
+  if (hasClinicDemo && window.KAZVORA_CLINIC_DEMO) {
+    const c = window.KAZVORA_CLINIC_DEMO;
+    test(
+      'CLINIC-01',
+      'Clínica',
+      'Bloquea fechas pasadas, inexistentes y domingos; acepta día hábil futuro',
+      !c.validateAppointmentDate('2020-01-01').valid &&
+      !c.validateAppointmentDate('2026-02-30').valid &&
+      !c.validateAppointmentDate('2026-11-29').valid &&
+      c.validateAppointmentDate('2026-11-30').valid
+    );
+    c.selectService('valoracion-limpieza');
+    c.selectTimeSlot('11:00');
+    elementsById['patient-name'].value = 'Mariana López';
+    elementsById['appointment-date'].value = '2026-11-30';
+    lastClipboardText = null;
+    elementsById['clinic-booking-form'].dispatchEvent('submit', { preventDefault() {} });
+    await flushAsync();
+    test(
+      'CLINIC-02',
+      'Clínica',
+      'Prepara solicitud de cita y la copia al portapapeles sin número comercial ficticio',
+      c.CLINIC_CONFIG.whatsappNumber === '' &&
+      typeof lastClipboardText === 'string' &&
+      lastClipboardText.includes('Mariana López') &&
+      lastClipboardText.includes('11:00 h')
+    );
+  }
 
   const report = {
     timestamp: new Date().toISOString(),
