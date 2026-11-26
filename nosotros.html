@@ -3,97 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="Conoce la visión y principios de KAZVORA Technologies.">
+  <meta name="description" content="Conoce la visión, principios de ingeniería y hoja de ruta de KAZVORA Technologies.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="KAZVORA Technologies">
+  <meta property="og:title" content="Nosotros | KAZVORA Technologies">
+  <meta property="og:description" content="Ingeniería honesta, soluciones útiles y crecimiento técnico progresivo en KAZVORA Technologies.">
+  <meta property="og:url" content="https://santana282.github.io/kazvora-portfolio/nosotros.html">
+  <meta property="og:image" content="https://santana282.github.io/kazvora-portfolio/assets/images/og-kazvora.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://santana282.github.io/kazvora-portfolio/assets/images/og-kazvora.jpg">
   <title>Nosotros | KAZVORA Technologies</title>
-
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/styles.css">
-
+  <script src="js/config.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
-
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
-      <img
-        class="brand-icon"
-        src="assets/icons/favicon.svg"
-        alt=""
-        width="44"
-        height="44"
-      >
-      <span class="brand-copy">
-        <strong>KAZVORA</strong>
-        <small>TECHNOLOGIES</small>
-      </span>
+      <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
+      <span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span>
     </a>
-
-    <button
-      class="menu-toggle"
-      aria-expanded="false"
-      aria-controls="main-nav"
-      aria-label="Abrir menú"
-      type="button"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
     </button>
-
     <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
       <a href="index.html">Inicio</a>
       <a href="portafolio.html">Portafolio</a>
       <a href="servicios.html">Servicios</a>
-      <a class="active" href="nosotros.html" aria-current="page">Nosotros</a>
-      <a class="nav-contact" href="contacto.html">
-        Contacto <span aria-hidden="true">↗</span>
-      </a>
+      <a class="active" aria-current="page" href="nosotros.html">Nosotros</a>
+      <a class="nav-contact" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
 
   <main id="contenido">
     <section class="page-hero section-wrap">
       <p class="eyebrow">UNA MARCA CON VISIÓN DE FUTURO</p>
-
-      <h1>
-        Pequeños comienzos.<br>
-        <span class="gradient-text">Grandes posibilidades.</span>
-      </h1>
-
-      <p>
-        KAZVORA nace con una idea sencilla: utilizar la tecnología para
-        resolver problemas reales y construir soluciones que puedan mejorar
-        con el tiempo.
-      </p>
+      <h1>Pequeños comienzos.<br><span class="gradient-text">Grandes posibilidades.</span></h1>
+      <p>KAZVORA nace con una idea sencilla: utilizar la ingeniería y el diseño para resolver problemas reales y construir soluciones que puedan mejorar con el tiempo.</p>
     </section>
 
     <section class="section-wrap about-layout">
       <div class="about-statement">
         <span class="quote-mark" aria-hidden="true">“</span>
-        <h2>No se trata de usar tecnología por usarla. Se trata de que sea útil.</h2>
+        <h2>No se trata de usar tecnología por usarla. Se trata de que sea útil, segura y mantenible.</h2>
       </div>
-
       <div class="about-copy">
-        <p>
-          Somos una iniciativa tecnológica en etapa inicial, enfocada en
-          aprender, construir y ofrecer soluciones digitales con responsabilidad.
-        </p>
-
-        <p>
-          La marca está pensada para evolucionar desde proyectos web y
-          herramientas digitales hacia software, sistemas de datos y
-          automatización, siempre conforme existan las competencias y recursos
-          necesarios.
-        </p>
-
-        <p>
-          El portafolio distinguirá con transparencia las demostraciones,
-          los proyectos personales, los trabajos académicos y los encargos
-          para clientes.
-        </p>
+        <p>Somos una firma tecnológica en etapa de crecimiento enfocada en entregar soluciones web y comerciales concretas con criterio de ingeniería y responsabilidad.</p>
+        <p>Nuestra hoja de ruta contempla cinco pilares: Desarrollo Web, Software, Bases de Datos, Inteligencia Artificial y Cloud Solutions, incorporando cada capacidad de manera gradual y verificada.</p>
+        <p>Nuestro portafolio distingue siempre con total transparencia las demostraciones funcionales, los proyectos propios y los encargos para clientes.</p>
       </div>
     </section>
 
@@ -101,56 +68,38 @@
       <article>
         <span class="value-number">01</span>
         <h3>Claridad</h3>
-        <p>Definimos objetivos, alcance y entregables antes de comenzar.</p>
+        <p>Definimos objetivos, alcance, entregables y límites técnicos antes de comenzar.</p>
       </article>
-
       <article>
         <span class="value-number">02</span>
-        <h3>Aprendizaje</h3>
-        <p>Cada proyecto es una oportunidad para mejorar el proceso y las habilidades.</p>
+        <h3>Ingeniería y seguridad</h3>
+        <p>Construimos código limpio, accesible y protegido desde la base para resistir el crecimiento.</p>
       </article>
-
       <article>
         <span class="value-number">03</span>
         <h3>Responsabilidad</h3>
-        <p>Prometemos únicamente lo que podemos entregar y comunicamos los límites.</p>
+        <p>Prometemos únicamente lo que podemos entregar y validamos cada resultado antes de publicarlo.</p>
       </article>
     </section>
 
     <section class="section-wrap closing-cta">
       <div>
         <p class="eyebrow">CONSTRUYAMOS CON PROPÓSITO</p>
-        <h2>
-          La próxima idea empieza <span class="gradient-text">aquí.</span>
-        </h2>
+        <h2>La próxima idea empieza <span class="gradient-text">aquí.</span></h2>
       </div>
-
-      <a class="button button-primary" href="contacto.html">
-        Contacto <span aria-hidden="true">↗</span>
-      </a>
+      <a class="button button-primary" href="contacto.html">Contacto <span aria-hidden="true">↗</span></a>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand footer-brand" href="index.html" aria-label="KAZVORA Technologies, inicio">
-      <img
-        class="brand-icon"
-        src="assets/icons/favicon.svg"
-        alt=""
-        width="44"
-        height="44"
-      >
-      <span class="brand-copy">
-        <strong>KAZVORA</strong>
-        <small>TECHNOLOGIES</small>
-      </span>
+    <a class="brand footer-brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">K<span>Z</span></span>
+      <span class="brand-copy"><strong>KAZVORA</strong><small>TECHNOLOGIES</small></span>
     </a>
-
     <p>Tecnología que convierte ideas en soluciones.</p>
-
     <div class="footer-bottom">
-      <span>© <span id="year"></span> KAZVORA Technologies</span>
-      <span>Construido con intención. Diseñado para crecer.</span>
+      <span>© <span id="year"></span> KAZVORA Technologies · Kevin Santana Ramírez</span>
+      <span><a class="text-link" href="privacidad.html">Aviso de Privacidad</a></span>
     </div>
   </footer>
 </body>
