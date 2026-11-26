@@ -1,0 +1,19 @@
+{
+  "name": "KAZVORA Technologies",
+  "short_name": "KAZVORA",
+  "description": "Tecnología que convierte ideas en soluciones. Desarrollo web, catálogos digitales, sistemas de citas y software a medida.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "lang": "es-MX",
+  "icons": [
+    {
+      "src": "assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
