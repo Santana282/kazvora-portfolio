@@ -1,14 +1,12 @@
 /**
- * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.2 (Node.js 22+)
+ * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.3 (Node.js 22/24+)
  * Archivo: tests/run-fase4-audit-tests.js
  *
- * Cubre:
- * - Arquitectura DOM nativa (0 innerHTML en controladores)
- * - Configuración desacoplada (js/config.js) y CSP/Referrer-Policy en todas las vistas (incl. 404.html)
- * - Validación positiva de URLs y esquema de proyectos
- * - Preselección segura de ?tipo= por lista blanca (anti DOM-XSS y anti prototype pollution)
- * - Brief estructurado de contacto, honeypot, portapapeles asíncrono y cooldown
- * - Demostración Comercial #1 (Repostería) y Demostración Comercial #2 (Clínica de Citas)
+ * Sincronizada con la activación comercial oficial:
+ * - Verifica js/config.js (WhatsApp oficial E.164 activo, correo comercial y demos aisladas en "")
+ * - Verifica flujo de contacto con WhatsApp activo (wa.me + opener=null + popup bloqueado + respaldo)
+ * - Verifica privacidad.html (CSP, favicon, derechos ARCO y responsable)
+ * - Valida las 3 demostraciones (Repostería, Clínica Dental y Panel Operativo con protección CSV)
  */
 
 const fs = require('fs');
@@ -26,6 +24,7 @@ function createNativeMockDOM() {
       textContent: '',
       className: '',
       hidden: false,
+      disabled: false,
       attributes: {},
       children: [],
       classList: {
@@ -99,7 +98,11 @@ function createNativeMockDOM() {
     'clinic-filters', 'clinic-services-grid', 'selected-service-box',
     'clinic-booking-form', 'patient-name', 'visit-type', 'appointment-date',
     'time-slots-grid', 'patient-notes', 'clinic-whatsapp-preview',
-    'copy-booking-btn', 'booking-feedback'
+    'copy-booking-btn', 'booking-feedback',
+    'kpi-total-skus', 'kpi-total-units', 'kpi-inventory-value', 'kpi-session-sales',
+    'kpi-sales-count', 'kpi-low-stock', 'ops-filters', 'ops-search',
+    'ops-inventory-body', 'ops-add-form', 'ops-feedback', 'ops-activity-log',
+    'export-csv-btn', 'reset-demo-btn'
   ].forEach(id => makeEl('div', id));
 
   const menuToggle = makeEl('button', 'menu-toggle-btn');
@@ -138,6 +141,7 @@ async function runSuite() {
   let deferredResolve = null;
   let simulatePopupBlocked = false;
   let lastCreatedPopup = null;
+  let lastOpenedUrl = null;
 
   global.window = global;
   global.document = documentMock;
@@ -168,7 +172,8 @@ async function runSuite() {
     configurable: true
   });
 
-  global.window.open = function () {
+  global.window.open = function (url) {
+    lastOpenedUrl = url;
     if (simulatePopupBlocked) {
       lastCreatedPopup = null;
       return null;
@@ -179,17 +184,18 @@ async function runSuite() {
 
   const baseDir = path.resolve(__dirname, '..');
   const clinicAppPath = path.join(baseDir, 'demos', 'clinica-citas', 'app.js');
+  const opsAppPath = path.join(baseDir, 'demos', 'panel-operativo', 'app.js');
   const hasClinicDemo = fs.existsSync(clinicAppPath);
-  const page404Path = path.join(baseDir, '404.html');
-  const has404 = fs.existsSync(page404Path);
+  const hasOpsDemo = fs.existsSync(opsAppPath);
+  const has404 = fs.existsSync(path.join(baseDir, '404.html'));
+  const hasPrivacy = fs.existsSync(path.join(baseDir, 'privacidad.html'));
 
   require(path.join(baseDir, 'js', 'config.js'));
   require(path.join(baseDir, 'js', 'projects.js'));
   require(path.join(baseDir, 'js', 'main.js'));
   require(path.join(baseDir, 'demos', 'reposteria', 'app.js'));
-  if (hasClinicDemo) {
-    require(clinicAppPath);
-  }
+  if (hasClinicDemo) require(clinicAppPath);
+  if (hasOpsDemo) require(opsAppPath);
 
   documentMock.triggerDOMContentLoaded();
 
@@ -208,23 +214,36 @@ async function runSuite() {
   const s = window.KAZVORA_SCHEMA;
   const d = window.KAZVORA_BAKERY_DEMO;
 
-  // 1. Seguridad DOM, Configuración y CSP
-  const mainSrc = fs.readFileSync(path.join(baseDir, 'js', 'main.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  const appSrc = fs.readFileSync(path.join(baseDir, 'demos', 'reposteria', 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  const clinicSrc = hasClinicDemo
-    ? fs.readFileSync(clinicAppPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-    : '';
+  // 1. Seguridad DOM, Configuración Comercial y CSP
+  const jsFilesToCheck = [
+    path.join(baseDir, 'js', 'main.js'),
+    path.join(baseDir, 'demos', 'reposteria', 'app.js')
+  ];
+  if (hasClinicDemo) jsFilesToCheck.push(clinicAppPath);
+  if (hasOpsDemo) jsFilesToCheck.push(opsAppPath);
 
-  test('SEC-DOM-01', 'XSS', 'Los controladores JS operan con 0 usos de innerHTML', !mainSrc.includes('innerHTML') && !appSrc.includes('innerHTML') && !clinicSrc.includes('innerHTML'));
-  test('ENV-01', 'Config', 'window.KAZVORA_ENV existe, está congelado y sin números ficticios', Boolean(window.KAZVORA_ENV && Object.isFrozen(window.KAZVORA_ENV) && window.KAZVORA_ENV.whatsappNumber === ''));
+  const hasAnyInnerHtml = jsFilesToCheck.some(fp => {
+    const clean = fs.readFileSync(fp, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    return clean.includes('innerHTML');
+  });
+  test('SEC-DOM-01', 'XSS', 'Todos los controladores JS operan con 0 usos de innerHTML', !hasAnyInnerHtml);
+
+  const env = window.KAZVORA_ENV;
+  const validCorpPhone = env && (env.whatsappNumber === '' || u.validateWhatsAppPhone(env.whatsappNumber) === '522721832762');
+  test(
+    'ENV-01',
+    'Config',
+    'window.KAZVORA_ENV congelado, WhatsApp comercial E.164 válido y demos aisladas sin spam',
+    Boolean(env && Object.isFrozen(env) && validCorpPhone && env.demoBakeryWhatsappNumber === '' && (env.demoClinicWhatsappNumber === undefined || env.demoClinicWhatsappNumber === '')),
+    JSON.stringify(env)
+  );
 
   const htmlPages = ['index.html', 'portafolio.html', 'servicios.html', 'nosotros.html', 'contacto.html', 'demos/reposteria/index.html'];
-  if (hasClinicDemo && fs.existsSync(path.join(baseDir, 'demos', 'clinica-citas', 'index.html'))) {
-    htmlPages.push('demos/clinica-citas/index.html');
-  }
-  if (has404) {
-    htmlPages.push('404.html');
-  }
+  if (hasClinicDemo && fs.existsSync(path.join(baseDir, 'demos', 'clinica-citas', 'index.html'))) htmlPages.push('demos/clinica-citas/index.html');
+  if (hasOpsDemo && fs.existsSync(path.join(baseDir, 'demos', 'panel-operativo', 'index.html'))) htmlPages.push('demos/panel-operativo/index.html');
+  if (has404) htmlPages.push('404.html');
+  if (hasPrivacy) htmlPages.push('privacidad.html');
+
   const missingCsp = htmlPages.filter(p => {
     const html = fs.readFileSync(path.join(baseDir, p), 'utf8');
     return !(html.includes('http-equiv="Content-Security-Policy"') && html.includes('name="referrer"'));
@@ -232,14 +251,18 @@ async function runSuite() {
   test('SEC-CSP-01', 'CSP', 'Todas las páginas HTML declaran Content-Security-Policy y Referrer-Policy', missingCsp.length === 0, 'Falta en: ' + missingCsp.join(', '));
 
   if (has404) {
-    const html404 = fs.readFileSync(page404Path, 'utf8');
+    const html404 = fs.readFileSync(path.join(baseDir, '404.html'), 'utf8');
     test('SEC-404-01', 'Resiliencia', '404.html incluye favicon.svg, robots noindex y enlace a index.html', html404.includes('assets/icons/favicon.svg') && html404.includes('noindex') && html404.includes('index.html'));
   }
 
-  // 2. Validación positiva de URLs y parámetros de consulta
+  if (hasPrivacy) {
+    const htmlPriv = fs.readFileSync(path.join(baseDir, 'privacidad.html'), 'utf8');
+    test('SEC-PRIV-01', 'Privacidad', 'privacidad.html identifica titular, correo de derechos ARCO y favicon.svg', htmlPriv.includes('Kevin Santana Ramírez') && htmlPriv.includes('ARCO') && htmlPriv.includes('assets/icons/favicon.svg'));
+  }
+
+  // 2. Validación de URLs y parámetro ?tipo=
   test('URL-01', 'MAIN-001', 'Acepta HTTPS, HTTP y ruta relativa limpia', u.validateSafeUrl('https://kazvora.com') === 'https://kazvora.com' && u.validateSafeUrl('http://example.com') === 'http://example.com' && u.validateSafeUrl('demos/reposteria/index.html') === 'demos/reposteria/index.html');
   test('URL-02', 'MAIN-001', 'Rechaza javascript:, data:, vbscript:, // y comillas', u.validateSafeUrl('javascript:alert(1)') === null && u.validateSafeUrl('data:text/html,<script>') === null && u.validateSafeUrl('vbscript:alert(1)') === null && u.validateSafeUrl('//evil.com') === null && u.validateSafeUrl('https://a.com/"onclick="x') === null);
-
   test(
     'SEC-URLPARAM-01',
     'Seguridad',
@@ -263,10 +286,11 @@ async function runSuite() {
     test('PROJ-02', 'Esquema', 'Validador de esquema descarta duplicados y URLs peligrosas', filtered.length === 1 && filtered[0].id === 'ok-1');
   }
 
-  // 4. Formulario de contacto y brief comercial
+  // 4. Formulario de contacto (WhatsApp activo + bloqueo de popups + respaldo portapapeles + cooldown)
   const form = elementsById['contact-form'];
   const fb = elementsById['form-feedback'];
   const origCooldown = u.CONFIG.contactCooldownMs;
+  const origPhone = u.CONFIG.whatsappNumber;
 
   elementsById['name'].value = ''; elementsById['message'].value = '';
   form.dispatchEvent('submit', { preventDefault() {} });
@@ -279,13 +303,42 @@ async function runSuite() {
   elementsById['website-trap'].value = '';
 
   u.CONFIG.contactCooldownMs = 0;
-  lastClipboardText = null;
-  clipboardMode = 'deferred';
   elementsById['name'].value = 'Carlos Santana';
   elementsById['email'].value = 'carlos@kazvora.com';
   elementsById['has-domain'].value = 'Aún no, empezaría desde cero';
   elementsById['target-timeline'].value = 'Lo antes posible (2 a 4 semanas)';
   elementsById['message'].value = 'Necesito un sitio web corporativo adaptable a móvil.';
+
+  if (u.validateWhatsAppPhone(origPhone)) {
+    simulatePopupBlocked = false;
+    lastOpenedUrl = null;
+    lastClipboardText = null;
+    form.dispatchEvent('submit', { preventDefault() {} });
+    await flushAsync();
+    const waActiveOk =
+      typeof lastOpenedUrl === 'string' &&
+      lastOpenedUrl.startsWith('https://wa.me/' + u.validateWhatsAppPhone(origPhone) + '?text=') &&
+      lastCreatedPopup !== null &&
+      lastCreatedPopup.opener === null &&
+      fb.className.includes('is-success') &&
+      fb.textContent.includes('Se solicitó abrir WhatsApp');
+
+    simulatePopupBlocked = true;
+    form.dispatchEvent('submit', { preventDefault() {} });
+    await flushAsync();
+    const waBlockedOk =
+      lastCreatedPopup === null &&
+      fb.className.includes('is-error') &&
+      fb.textContent.includes('bloqueó la ventana emergente');
+
+    simulatePopupBlocked = false;
+    test('FORM-WA-01', 'WhatsApp', 'Contacto abre wa.me oficial con opener=null y detecta popups bloqueados', waActiveOk && waBlockedOk, JSON.stringify({ waActiveOk, waBlockedOk, lastOpenedUrl, fb: fb.textContent }));
+  }
+
+  u.CONFIG.whatsappNumber = '';
+  lastClipboardText = null;
+  clipboardMode = 'deferred';
+  fb.className = ''; fb.textContent = '';
   form.dispatchEvent('submit', { preventDefault() {} });
   const pendingOk = !fb.className.includes('is-success') && lastClipboardText === null;
   if (deferredResolve) deferredResolve();
@@ -299,6 +352,8 @@ async function runSuite() {
   await flushAsync();
   const fallbackOk = fb.className.includes('is-success') && fb.textContent.includes('cópialo manualmente');
   clipboardMode = 'resolve';
+  u.CONFIG.whatsappNumber = origPhone;
+
   test('FORM-03', 'Asíncrono', 'Portapapeles asíncrono sin falso positivo y respaldo ante rechazo', pendingOk && resolvedOk && fallbackOk);
   test('FORM-05', 'Brief', 'El mensaje estructurado incluye estado de dominio y plazo estimado', briefFieldsOk);
 
@@ -318,9 +373,9 @@ async function runSuite() {
     !d.setProductQuantity('pastel-red-velvet', NaN).ok &&
     d.setProductQuantity('pastel-red-velvet', 0).ok
   );
-  test('DEMO-03', 'Repostería', 'Teléfono internacional E.164 y configuración vacía sin ficticios',
-    d.validateWhatsAppPhone('+52 272 123 4567') === '522721234567' &&
-    d.validateWhatsAppPhone('2721234567') === null &&
+  test('DEMO-03', 'Repostería', 'Teléfono internacional E.164 y demo aislada sin spam al dueño',
+    d.validateWhatsAppPhone('+52 272 183 2762') === '522721832762' &&
+    d.validateWhatsAppPhone('2721832762') === null &&
     d.validateWhatsAppPhone('') === null &&
     d.DEMO_CONFIG.whatsappNumber === ''
   );
@@ -343,7 +398,7 @@ async function runSuite() {
     addBtns.length === 6 && addBtns.every(b => (b.getAttribute('aria-label') || '').includes('al pedido'))
   );
 
-  d.DEMO_CONFIG.whatsappNumber = '522721234567';
+  d.DEMO_CONFIG.whatsappNumber = '522721832762';
   d.setProductQuantity('pastel-red-velvet', 1);
   elementsById['customer-name'].value = 'Sofía Hernández';
   elementsById['delivery-date'].value = today;
@@ -363,6 +418,7 @@ async function runSuite() {
   d.setProductQuantity('pastel-red-velvet', 0);
   elementsById['customer-name'].value = '';
   elementsById['delivery-date'].value = '';
+  simulatePopupBlocked = false;
 
   test('DEMO-07', 'Popups', 'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups', popOk && popBlockedOk, JSON.stringify({ popOk, popBlockedOk, popBlockedFeedback }));
 
@@ -388,12 +444,24 @@ async function runSuite() {
     test(
       'CLINIC-02',
       'Clínica',
-      'Prepara solicitud de cita y la copia al portapapeles sin número comercial ficticio',
+      'Prepara solicitud de cita y la copia al portapapeles manteniendo demo aislada',
       c.CLINIC_CONFIG.whatsappNumber === '' &&
       typeof lastClipboardText === 'string' &&
       lastClipboardText.includes('Mariana López') &&
       lastClipboardText.includes('11:00 h')
     );
+  }
+
+  // 7. Demostración #3: Panel Operativo (Inventario + CSV Formula Injection)
+  if (hasOpsDemo && window.KAZVORA_OPS_DEMO) {
+    const o = window.KAZVORA_OPS_DEMO;
+    const sellOk = o.registerMovement('CAF-001', 'sell');
+    const sellZeroBlocked = !o.registerMovement('ACC-005', 'sell').ok;
+    const formulaAdded = o.addProduct({ sku: 'SEC-999', name: '=CMD("calc")', category: 'Accesorios', price: 150, stock: 2, minStock: 1 });
+    const csvOut = o.generateSafeCsv(o.getInventorySnapshot());
+    const csvSafe = csvOut.includes('"' + "'=CMD(" + '""calc""' + ')"');
+    o.resetDemoState();
+    test('OPS-01', 'Panel Operativo', 'Controla ventas, bloquea stock 0 y neutraliza CSV Formula Injection', sellOk.ok && sellZeroBlocked && formulaAdded.ok && csvSafe);
   }
 
   const report = {

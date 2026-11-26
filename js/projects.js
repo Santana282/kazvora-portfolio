@@ -207,12 +207,12 @@
       category: "Datos y software",
       status: "Demostración",
       description:
-        "Concepto técnico en evolución para estructurar registros de ventas, control de catálogo e indicadores básicos para pequeños comercios.",
-      technologies: ["JavaScript", "JSON", "Arquitectura Modular"],
+        "Prototipo interactivo de software administrativo para pymes: control de inventario, alertas de stock bajo, registro de ventas y exportación CSV segura.",
+      technologies: ["HTML5", "CSS3", "JavaScript", "Exportación CSV"],
       icon: "⌘",
       theme: "blue",
       featured: false,
-      url: ""
+      url: "demos/panel-operativo/index.html"
     }
   ];
 
