@@ -1,11 +1,12 @@
 /**
- * KAZVORA Technologies — Configuración Pública de Entorno v2.3 (js/config.js)
+ * KAZVORA Technologies — Configuración Pública de Entorno v2.4 (js/config.js)
  *
- * REGLA DE SEGURIDAD:
+ * REGLA DE SEGURIDAD OBLIGATORIA:
  * - Este archivo es público en el navegador.
- * - NUNCA colocar contraseñas, claves API privadas, tokens, datos bancarios ni secretos aquí.
- * - Contiene únicamente datos de contacto comercial autorizados por el propietario
- *   y parámetros públicos de operación del frontend.
+ * - NUNCA colocar contraseñas, SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY,
+ *   STRIPE_WEBHOOK_SECRET, tokens privados ni datos bancarios aquí.
+ * - supabaseUrl y supabaseAnonKey son parámetros públicos diseñados para operar
+ *   junto con Row Level Security (RLS) activado en PostgreSQL.
  */
 (function () {
   "use strict";
@@ -19,9 +20,7 @@
     contactEmail: "kevinsantanaramirez282@gmail.com",
     whatsappNumber: "522721832762",
 
-    // Las demostraciones comerciales conservan su canal vacío "" para evitar
-    // que visitantes envíen pedidos ficticios de pasteles o citas médicas al WhatsApp real.
-    // Sus botones de "Cotizar un sitio así" dirigen a contacto.html con el canal oficial activo.
+    // Demostraciones aisladas en "" para evitar envíos ficticios al WhatsApp real
     demoBakeryWhatsappNumber: "",
     demoClinicWhatsappNumber: "",
 
@@ -29,7 +28,12 @@
     contactCooldownMs: 2500,
     demoMaxQuantityPerProduct: 10,
 
-    // Endpoint base para futura API backend (vacío mientras opere en GitHub Pages)
+    // Conexión al Portal de Clientes (completar cuando el proyecto Supabase esté creado
+    // y se haya ejecutado supabase/001_portal_clientes_pagos.sql con RLS activo).
+    supabaseUrl: "",
+    supabaseAnonKey: "",
+
+    // Endpoint base para Cloudflare Pages Functions (en producción usar "/api")
     apiBaseUrl: ""
   });
 

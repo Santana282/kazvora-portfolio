@@ -1,12 +1,15 @@
 /**
- * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.3 (Node.js 22/24+)
+ * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.4 (Node.js 22/24+)
  * Archivo: tests/run-fase4-audit-tests.js
  *
- * Sincronizada con la activación comercial oficial:
- * - Verifica js/config.js (WhatsApp oficial E.164 activo, correo comercial y demos aisladas en "")
- * - Verifica flujo de contacto con WhatsApp activo (wa.me + opener=null + popup bloqueado + respaldo)
- * - Verifica privacidad.html (CSP, favicon, derechos ARCO y responsable)
- * - Valida las 3 demostraciones (Repostería, Clínica Dental y Panel Operativo con protección CSV)
+ * Cubre:
+ * - Arquitectura DOM nativa (0 innerHTML en todos los controladores, incluido js/portal.js)
+ * - Configuración pública (js/config.js) con WhatsApp comercial oficial y demos aisladas
+ * - CSP, Referrer-Policy, favicon.svg, 404.html, privacidad.html y portal.html
+ * - Validación de URLs, lista blanca ?tipo=, honeypot, cooldown y portapapeles asíncrono
+ * - Las 3 demostraciones comerciales (Repostería, Clínica Dental y Panel Operativo + CSV seguro)
+ * - Portal de Clientes (js/portal.js): modo seguro sin backend, validación de contraseñas, 0 localStorage
+ * - Funciones de servidor (functions/api/): verificación de ausencia de secretos embebidos y estructura HMAC-SHA256
  */
 
 const fs = require('fs');
@@ -21,6 +24,7 @@ function createNativeMockDOM() {
       tagName: String(tag).toUpperCase(),
       id: id,
       value: '',
+      checked: false,
       textContent: '',
       className: '',
       hidden: false,
@@ -60,6 +64,7 @@ function createNativeMockDOM() {
         list.forEach(fn => fn(eventObj));
       },
       focus() { this._focused = true; },
+      reset() { this._reset = true; },
       querySelectorAll(sel) {
         const out = [];
         function walk(node) {
@@ -102,11 +107,19 @@ function createNativeMockDOM() {
     'kpi-total-skus', 'kpi-total-units', 'kpi-inventory-value', 'kpi-session-sales',
     'kpi-sales-count', 'kpi-low-stock', 'ops-filters', 'ops-search',
     'ops-inventory-body', 'ops-add-form', 'ops-feedback', 'ops-activity-log',
-    'export-csv-btn', 'reset-demo-btn'
+    'export-csv-btn', 'reset-demo-btn',
+    'portal-backend-notice', 'portal-auth-section', 'portal-dashboard',
+    'portal-login-form', 'login-email', 'login-password', 'login-feedback',
+    'portal-register-form', 'reg-name', 'reg-business', 'reg-phone', 'reg-email', 'reg-password', 'reg-privacy', 'register-feedback',
+    'portal-recover-form', 'recover-email', 'recover-feedback',
+    'portal-user-name', 'portal-user-email', 'portal-refresh-btn', 'portal-logout-btn',
+    'portal-projects-list', 'portal-payments-body', 'portal-dashboard-feedback'
   ].forEach(id => makeEl('div', id));
 
   const menuToggle = makeEl('button', 'menu-toggle-btn');
   menuToggle.setAttribute('aria-expanded', 'false');
+
+  const portalSubmitBtn = makeEl('button', 'portal-submit-mock');
 
   const docListeners = {};
   const documentMock = {
@@ -114,6 +127,10 @@ function createNativeMockDOM() {
     createTextNode(text) { return { nodeType: 3, textContent: String(text) }; },
     getElementById(id) { return elementsById[id] || null; },
     querySelector(sel) { return sel === '.menu-toggle' ? menuToggle : null; },
+    querySelectorAll(sel) {
+      if (sel.includes("button[type='submit']")) return [portalSubmitBtn];
+      return [];
+    },
     addEventListener(ev, fn) {
       if (!docListeners[ev]) docListeners[ev] = [];
       docListeners[ev].push(fn);
@@ -124,7 +141,7 @@ function createNativeMockDOM() {
     body: makeEl('body', 'doc-body')
   };
 
-  return { documentMock, elementsById, menuToggle };
+  return { documentMock, elementsById, menuToggle, portalSubmitBtn };
 }
 
 async function flushAsync() {
@@ -134,7 +151,7 @@ async function flushAsync() {
 }
 
 async function runSuite() {
-  const { documentMock, elementsById } = createNativeMockDOM();
+  const { documentMock, elementsById, portalSubmitBtn } = createNativeMockDOM();
 
   let lastClipboardText = null;
   let clipboardMode = 'resolve';
@@ -185,10 +202,16 @@ async function runSuite() {
   const baseDir = path.resolve(__dirname, '..');
   const clinicAppPath = path.join(baseDir, 'demos', 'clinica-citas', 'app.js');
   const opsAppPath = path.join(baseDir, 'demos', 'panel-operativo', 'app.js');
+  const portalJsPath = path.join(baseDir, 'js', 'portal.js');
+  const webhookPath = path.join(baseDir, 'functions', 'api', 'stripe-webhook.js');
+  const checkoutPath = path.join(baseDir, 'functions', 'api', 'create-checkout.js');
+
   const hasClinicDemo = fs.existsSync(clinicAppPath);
   const hasOpsDemo = fs.existsSync(opsAppPath);
+  const hasPortal = fs.existsSync(portalJsPath);
   const has404 = fs.existsSync(path.join(baseDir, '404.html'));
   const hasPrivacy = fs.existsSync(path.join(baseDir, 'privacidad.html'));
+  const hasFunctions = fs.existsSync(webhookPath) && fs.existsSync(checkoutPath);
 
   require(path.join(baseDir, 'js', 'config.js'));
   require(path.join(baseDir, 'js', 'projects.js'));
@@ -196,6 +219,7 @@ async function runSuite() {
   require(path.join(baseDir, 'demos', 'reposteria', 'app.js'));
   if (hasClinicDemo) require(clinicAppPath);
   if (hasOpsDemo) require(opsAppPath);
+  if (hasPortal) require(portalJsPath);
 
   documentMock.triggerDOMContentLoaded();
 
@@ -221,6 +245,7 @@ async function runSuite() {
   ];
   if (hasClinicDemo) jsFilesToCheck.push(clinicAppPath);
   if (hasOpsDemo) jsFilesToCheck.push(opsAppPath);
+  if (hasPortal) jsFilesToCheck.push(portalJsPath);
 
   const hasAnyInnerHtml = jsFilesToCheck.some(fp => {
     const clean = fs.readFileSync(fp, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
@@ -243,6 +268,7 @@ async function runSuite() {
   if (hasOpsDemo && fs.existsSync(path.join(baseDir, 'demos', 'panel-operativo', 'index.html'))) htmlPages.push('demos/panel-operativo/index.html');
   if (has404) htmlPages.push('404.html');
   if (hasPrivacy) htmlPages.push('privacidad.html');
+  if (hasPortal && fs.existsSync(path.join(baseDir, 'portal.html'))) htmlPages.push('portal.html');
 
   const missingCsp = htmlPages.filter(p => {
     const html = fs.readFileSync(path.join(baseDir, p), 'utf8');
@@ -286,7 +312,7 @@ async function runSuite() {
     test('PROJ-02', 'Esquema', 'Validador de esquema descarta duplicados y URLs peligrosas', filtered.length === 1 && filtered[0].id === 'ok-1');
   }
 
-  // 4. Formulario de contacto (WhatsApp activo + bloqueo de popups + respaldo portapapeles + cooldown)
+  // 4. Formulario de contacto
   const form = elementsById['contact-form'];
   const fb = elementsById['form-feedback'];
   const origCooldown = u.CONFIG.contactCooldownMs;
@@ -332,7 +358,7 @@ async function runSuite() {
       fb.textContent.includes('bloqueó la ventana emergente');
 
     simulatePopupBlocked = false;
-    test('FORM-WA-01', 'WhatsApp', 'Contacto abre wa.me oficial con opener=null y detecta popups bloqueados', waActiveOk && waBlockedOk, JSON.stringify({ waActiveOk, waBlockedOk, lastOpenedUrl, fb: fb.textContent }));
+    test('FORM-WA-01', 'WhatsApp', 'Contacto abre wa.me oficial con opener=null y detecta popups bloqueados', waActiveOk && waBlockedOk);
   }
 
   u.CONFIG.whatsappNumber = '';
@@ -420,15 +446,12 @@ async function runSuite() {
   elementsById['delivery-date'].value = '';
   simulatePopupBlocked = false;
 
-  test('DEMO-07', 'Popups', 'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups', popOk && popBlockedOk, JSON.stringify({ popOk, popBlockedOk, popBlockedFeedback }));
+  test('DEMO-07', 'Popups', 'Asigna opener=null al abrir WhatsApp y detecta bloqueo de popups', popOk && popBlockedOk);
 
   // 6. Demostración #2: Clínica Dental
   if (hasClinicDemo && window.KAZVORA_CLINIC_DEMO) {
     const c = window.KAZVORA_CLINIC_DEMO;
-    test(
-      'CLINIC-01',
-      'Clínica',
-      'Bloquea fechas pasadas, inexistentes y domingos; acepta día hábil futuro',
+    test('CLINIC-01', 'Clínica', 'Bloquea fechas pasadas, inexistentes y domingos; acepta día hábil futuro',
       !c.validateAppointmentDate('2020-01-01').valid &&
       !c.validateAppointmentDate('2026-02-30').valid &&
       !c.validateAppointmentDate('2026-11-29').valid &&
@@ -441,10 +464,7 @@ async function runSuite() {
     lastClipboardText = null;
     elementsById['clinic-booking-form'].dispatchEvent('submit', { preventDefault() {} });
     await flushAsync();
-    test(
-      'CLINIC-02',
-      'Clínica',
-      'Prepara solicitud de cita y la copia al portapapeles manteniendo demo aislada',
+    test('CLINIC-02', 'Clínica', 'Prepara solicitud de cita y la copia al portapapeles manteniendo demo aislada',
       c.CLINIC_CONFIG.whatsappNumber === '' &&
       typeof lastClipboardText === 'string' &&
       lastClipboardText.includes('Mariana López') &&
@@ -452,7 +472,7 @@ async function runSuite() {
     );
   }
 
-  // 7. Demostración #3: Panel Operativo (Inventario + CSV Formula Injection)
+  // 7. Demostración #3: Panel Operativo
   if (hasOpsDemo && window.KAZVORA_OPS_DEMO) {
     const o = window.KAZVORA_OPS_DEMO;
     const sellOk = o.registerMovement('CAF-001', 'sell');
@@ -462,6 +482,24 @@ async function runSuite() {
     const csvSafe = csvOut.includes('"' + "'=CMD(" + '""calc""' + ')"');
     o.resetDemoState();
     test('OPS-01', 'Panel Operativo', 'Controla ventas, bloquea stock 0 y neutraliza CSV Formula Injection', sellOk.ok && sellZeroBlocked && formulaAdded.ok && csvSafe);
+  }
+
+  // 8. Portal de Clientes y Backend Serverless (si están presentes)
+  if (hasPortal && window.KAZVORA_PORTAL_UTILS) {
+    const p = window.KAZVORA_PORTAL_UTILS;
+    const portalRaw = fs.readFileSync(portalJsPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    const noLocalStorageAuth = !portalRaw.includes('localStorage');
+    const strongPassOk = !p.validatePasswordStrength('12345').ok && !p.validatePasswordStrength('sololetraslargo').ok && p.validatePasswordStrength('Kazvora2026!').ok;
+    const safeUnconfiguredMode = p.isBackendConfigured() || (elementsById['portal-backend-notice'].hidden === false && portalSubmitBtn.disabled === true);
+    test('PORTAL-01', 'Portal Auth', 'Portal sin localStorage, contraseñas robustas y desactivación segura sin backend', noLocalStorageAuth && strongPassOk && safeUnconfiguredMode);
+  }
+
+  if (hasFunctions) {
+    const whCode = fs.readFileSync(webhookPath, 'utf8');
+    const chkCode = fs.readFileSync(checkoutPath, 'utf8');
+    const noHardcodedSecrets = !/(sk_live_|sk_test_|whsec_|eyJhbGci)/.test(whCode + chkCode);
+    const hasSecurityControls = whCode.includes('timingSafeEqualHex') && whCode.includes('REPLAY_TOLERANCE_SECONDS') && chkCode.includes('client_id=eq.');
+    test('API-SEC-01', 'Backend Pagos', 'Cloudflare Functions sin secretos embebidos, anti-IDOR y firma HMAC-SHA256', noHardcodedSecrets && hasSecurityControls);
   }
 
   const report = {
