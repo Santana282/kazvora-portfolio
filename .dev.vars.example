@@ -1,0 +1,13 @@
+# KAZVORA Technologies — Plantilla de Variables de Entorno Locales (.dev.vars.example)
+#
+# INSTRUCCIONES:
+# 1. Copia este archivo como ".dev.vars" en la raíz SOLO para probar localmente con Wrangler.
+# 2. NUNCA subas ".dev.vars" a GitHub (ya está bloqueado en .gitignore).
+# 3. En producción, carga estas mismas variables cifradas en Cloudflare Pages → Settings → Environment variables.
+
+SUPABASE_URL="https://tu-proyecto.supabase.co"
+SUPABASE_ANON_KEY="pega_aqui_tu_clave_publica_anon_de_supabase"
+SUPABASE_SERVICE_ROLE_KEY="pega_aqui_tu_clave_privada_service_role_de_supabase"
+STRIPE_SECRET_KEY="sk_test_pega_aqui_tu_clave_secreta_de_pruebas_stripe"
+STRIPE_WEBHOOK_SECRET="whsec_pega_aqui_tu_secreto_de_webhook_stripe"
+PUBLIC_SITE_URL="http://localhost:8788"

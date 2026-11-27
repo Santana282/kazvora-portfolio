@@ -1,12 +1,15 @@
 # Entornos y secretos (NUNCA subir al repositorio)
 .env
 .env.*
+.dev.vars
+.dev.vars.*
 *.pem
 *.key
 *.p12
 secrets/
 
-# Dependencias y artefactos temporales locales
+# Herramientas de despliegue y artefactos temporales locales
+.wrangler/
 node_modules/
 dist/
 build/

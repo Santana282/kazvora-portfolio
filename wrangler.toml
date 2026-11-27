@@ -1,0 +1,7 @@
+# KAZVORA Technologies — Configuración de Despliegue Cloudflare Pages
+# Documentación: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+# NUNCA colocar claves secretas en este archivo. Usa .dev.vars en local y Environment Variables en Cloudflare.
+
+name = "kazvora-technologies"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "."

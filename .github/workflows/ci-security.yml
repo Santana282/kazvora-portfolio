@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   automated-tests:
-    name: Suite de Seguridad y Regresión (Node.js 22)
+    name: Suite Frontend DOM Nativo + Seguridad Backend (Node.js 22)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +24,8 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Ejecutar pruebas automatizadas DOM nativo y seguridad
+      - name: Ejecutar pruebas de frontend, demos y portal (CommonJS)
         run: node tests/run-fase4-audit-tests.js
+
+      - name: Ejecutar pruebas criptográficas y anti-IDOR del backend (ESM)
+        run: node tests/test-backend-functions.mjs
