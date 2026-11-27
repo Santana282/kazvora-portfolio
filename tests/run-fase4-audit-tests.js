@@ -1,15 +1,14 @@
 /**
- * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.4 (Node.js 22/24+)
+ * KAZVORA Technologies — Suite de Pruebas Automatizadas v2.5 (Node.js 22/24+)
  * Archivo: tests/run-fase4-audit-tests.js
  *
  * Cubre:
- * - Arquitectura DOM nativa (0 innerHTML en todos los controladores, incluido js/portal.js)
+ * - Arquitectura DOM nativa (0 innerHTML y 0 localStorage en todos los controladores, incluidos portal.js y admin.js)
  * - Configuración pública (js/config.js) con WhatsApp comercial oficial y demos aisladas
- * - CSP, Referrer-Policy, favicon.svg, 404.html, privacidad.html y portal.html
- * - Validación de URLs, lista blanca ?tipo=, honeypot, cooldown y portapapeles asíncrono
+ * - CSP, Referrer-Policy, favicon.svg, 404.html, privacidad.html, portal.html y admin.html
+ * - Validación de URLs, lista blanca ?tipo= y ?pago=, honeypot, cooldown y portapapeles asíncrono
  * - Las 3 demostraciones comerciales (Repostería, Clínica Dental y Panel Operativo + CSV seguro)
- * - Portal de Clientes (js/portal.js): modo seguro sin backend, validación de contraseñas, 0 localStorage
- * - Funciones de servidor (functions/api/): verificación de ausencia de secretos embebidos y estructura HMAC-SHA256
+ * - Portal de Clientes (js/portal.js), Consola Administrativa (js/admin.js) y Backend Serverless (functions/api/)
  */
 
 const fs = require('fs');
@@ -29,6 +28,7 @@ function createNativeMockDOM() {
       className: '',
       hidden: false,
       disabled: false,
+      selected: false,
       attributes: {},
       children: [],
       classList: {
@@ -113,13 +113,19 @@ function createNativeMockDOM() {
     'portal-register-form', 'reg-name', 'reg-business', 'reg-phone', 'reg-email', 'reg-password', 'reg-privacy', 'register-feedback',
     'portal-recover-form', 'recover-email', 'recover-feedback',
     'portal-user-name', 'portal-user-email', 'portal-refresh-btn', 'portal-logout-btn',
-    'portal-projects-list', 'portal-payments-body', 'portal-dashboard-feedback'
+    'portal-projects-list', 'portal-payments-body', 'portal-dashboard-feedback',
+    'admin-backend-notice', 'admin-auth-section', 'admin-dashboard',
+    'admin-login-form', 'admin-email', 'admin-password', 'admin-login-feedback',
+    'admin-user-label', 'admin-user-email', 'admin-refresh-btn', 'admin-logout-btn',
+    'admin-create-project-form', 'proj-client-select', 'proj-title', 'proj-service-type', 'proj-amount-mxn', 'admin-project-feedback',
+    'admin-clients-body', 'admin-projects-body', 'admin-payments-body', 'admin-dashboard-feedback'
   ].forEach(id => makeEl('div', id));
 
   const menuToggle = makeEl('button', 'menu-toggle-btn');
   menuToggle.setAttribute('aria-expanded', 'false');
 
   const portalSubmitBtn = makeEl('button', 'portal-submit-mock');
+  const adminSubmitBtn = makeEl('button', 'admin-submit-mock');
 
   const docListeners = {};
   const documentMock = {
@@ -128,7 +134,8 @@ function createNativeMockDOM() {
     getElementById(id) { return elementsById[id] || null; },
     querySelector(sel) { return sel === '.menu-toggle' ? menuToggle : null; },
     querySelectorAll(sel) {
-      if (sel.includes("button[type='submit']")) return [portalSubmitBtn];
+      if (sel.includes('#portal-auth-section')) return [portalSubmitBtn];
+      if (sel.includes('#admin-auth-section')) return [adminSubmitBtn];
       return [];
     },
     addEventListener(ev, fn) {
@@ -141,7 +148,7 @@ function createNativeMockDOM() {
     body: makeEl('body', 'doc-body')
   };
 
-  return { documentMock, elementsById, menuToggle, portalSubmitBtn };
+  return { documentMock, elementsById, menuToggle, portalSubmitBtn, adminSubmitBtn };
 }
 
 async function flushAsync() {
@@ -151,7 +158,7 @@ async function flushAsync() {
 }
 
 async function runSuite() {
-  const { documentMock, elementsById, portalSubmitBtn } = createNativeMockDOM();
+  const { documentMock, elementsById, portalSubmitBtn, adminSubmitBtn } = createNativeMockDOM();
 
   let lastClipboardText = null;
   let clipboardMode = 'resolve';
@@ -163,7 +170,7 @@ async function runSuite() {
   global.window = global;
   global.document = documentMock;
   global.innerWidth = 1024;
-  global.location = { search: '?tipo=citas' };
+  global.location = { search: '?tipo=citas&pago=pendiente_confirmacion' };
 
   Object.defineProperty(global, 'navigator', {
     value: {
@@ -203,12 +210,14 @@ async function runSuite() {
   const clinicAppPath = path.join(baseDir, 'demos', 'clinica-citas', 'app.js');
   const opsAppPath = path.join(baseDir, 'demos', 'panel-operativo', 'app.js');
   const portalJsPath = path.join(baseDir, 'js', 'portal.js');
+  const adminJsPath = path.join(baseDir, 'js', 'admin.js');
   const webhookPath = path.join(baseDir, 'functions', 'api', 'stripe-webhook.js');
   const checkoutPath = path.join(baseDir, 'functions', 'api', 'create-checkout.js');
 
   const hasClinicDemo = fs.existsSync(clinicAppPath);
   const hasOpsDemo = fs.existsSync(opsAppPath);
   const hasPortal = fs.existsSync(portalJsPath);
+  const hasAdmin = fs.existsSync(adminJsPath);
   const has404 = fs.existsSync(path.join(baseDir, '404.html'));
   const hasPrivacy = fs.existsSync(path.join(baseDir, 'privacidad.html'));
   const hasFunctions = fs.existsSync(webhookPath) && fs.existsSync(checkoutPath);
@@ -220,6 +229,7 @@ async function runSuite() {
   if (hasClinicDemo) require(clinicAppPath);
   if (hasOpsDemo) require(opsAppPath);
   if (hasPortal) require(portalJsPath);
+  if (hasAdmin) require(adminJsPath);
 
   documentMock.triggerDOMContentLoaded();
 
@@ -246,6 +256,7 @@ async function runSuite() {
   if (hasClinicDemo) jsFilesToCheck.push(clinicAppPath);
   if (hasOpsDemo) jsFilesToCheck.push(opsAppPath);
   if (hasPortal) jsFilesToCheck.push(portalJsPath);
+  if (hasAdmin) jsFilesToCheck.push(adminJsPath);
 
   const hasAnyInnerHtml = jsFilesToCheck.some(fp => {
     const clean = fs.readFileSync(fp, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
@@ -269,6 +280,7 @@ async function runSuite() {
   if (has404) htmlPages.push('404.html');
   if (hasPrivacy) htmlPages.push('privacidad.html');
   if (hasPortal && fs.existsSync(path.join(baseDir, 'portal.html'))) htmlPages.push('portal.html');
+  if (hasAdmin && fs.existsSync(path.join(baseDir, 'admin.html'))) htmlPages.push('admin.html');
 
   const missingCsp = htmlPages.filter(p => {
     const html = fs.readFileSync(path.join(baseDir, p), 'utf8');
@@ -484,16 +496,54 @@ async function runSuite() {
     test('OPS-01', 'Panel Operativo', 'Controla ventas, bloquea stock 0 y neutraliza CSV Formula Injection', sellOk.ok && sellZeroBlocked && formulaAdded.ok && csvSafe);
   }
 
-  // 8. Portal de Clientes y Backend Serverless (si están presentes)
+  // 8. Portal de Clientes
   if (hasPortal && window.KAZVORA_PORTAL_UTILS) {
     const p = window.KAZVORA_PORTAL_UTILS;
     const portalRaw = fs.readFileSync(portalJsPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
     const noLocalStorageAuth = !portalRaw.includes('localStorage');
     const strongPassOk = !p.validatePasswordStrength('12345').ok && !p.validatePasswordStrength('sololetraslargo').ok && p.validatePasswordStrength('Kazvora2026!').ok;
     const safeUnconfiguredMode = p.isBackendConfigured() || (elementsById['portal-backend-notice'].hidden === false && portalSubmitBtn.disabled === true);
-    test('PORTAL-01', 'Portal Auth', 'Portal sin localStorage, contraseñas robustas y desactivación segura sin backend', noLocalStorageAuth && strongPassOk && safeUnconfiguredMode);
+    const pagoBannerOk =
+      typeof p.resolvePaymentReturnMessage === 'function' &&
+      p.resolvePaymentReturnMessage('?pago=pendiente_confirmacion') !== null &&
+      p.resolvePaymentReturnMessage('?pago=<script>alert(1)</script>') === null &&
+      elementsById['login-feedback'].textContent.includes('pasarela de pago');
+    test('PORTAL-01', 'Portal Auth', 'Portal sin localStorage, contraseñas robustas, modo seguro y retorno ?pago= por lista blanca', noLocalStorageAuth && strongPassOk && safeUnconfiguredMode && pagoBannerOk);
   }
 
+  // 9. Consola Administrativa (admin.html + js/admin.js)
+  if (hasAdmin && window.KAZVORA_ADMIN_UTILS) {
+    const a = window.KAZVORA_ADMIN_UTILS;
+    const adminRaw = fs.readFileSync(adminJsPath, 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+    const noLocalStorageAdmin = !adminRaw.includes('localStorage');
+    const validProj = a.validateProjectInput({
+      clientId: '11111111-2222-3333-4444-555555555555',
+      title: 'Catálogo Web Corporativo',
+      serviceType: 'web',
+      amountMxn: 4500
+    });
+    const invalidUuid = a.validateProjectInput({
+      clientId: 'no-es-uuid',
+      title: 'Test',
+      serviceType: 'web',
+      amountMxn: 500
+    });
+    const invalidAmount = a.validateProjectInput({
+      clientId: '11111111-2222-3333-4444-555555555555',
+      title: 'Test',
+      serviceType: 'web',
+      amountMxn: -100
+    });
+    const safeAdminUnconfigured = a.isBackendConfigured() || (elementsById['admin-backend-notice'].hidden === false && adminSubmitBtn.disabled === true);
+    test(
+      'ADMIN-01',
+      'Consola Admin',
+      'Admin sin localStorage, valida UUID/montos en centavos y se desactiva de forma segura sin backend',
+      noLocalStorageAdmin && validProj.ok && validProj.payload.total_amount_cents === 450000 && !invalidUuid.ok && !invalidAmount.ok && safeAdminUnconfigured
+    );
+  }
+
+  // 10. Backend Serverless (Cloudflare Pages Functions)
   if (hasFunctions) {
     const whCode = fs.readFileSync(webhookPath, 'utf8');
     const chkCode = fs.readFileSync(checkoutPath, 'utf8');

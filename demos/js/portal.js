@@ -1,14 +1,13 @@
 /**
- * KAZVORA Technologies — Controlador del Portal de Clientes v2.4 (js/portal.js)
+ * KAZVORA Technologies — Controlador del Portal de Clientes v2.5 (js/portal.js)
  *
  * CONTROLES DE SEGURIDAD (OWASP ASVS / LFPDPPP):
  * - Cero usos de innerHTML (construcción 100 % nativa del DOM con textContent).
  * - Cero almacenamiento de contraseñas o tokens en localStorage (sesión mantenida en memoria).
  * - Si supabaseUrl/supabaseAnonKey no están configurados, deshabilita envíos sin simular auth.
  * - Mensajes de recuperación y login genéricos para prevenir enumeración de usuarios.
+ * - Lectura segura por lista blanca del parámetro ?pago= tras regresar de Stripe Checkout.
  * - Validación de contraseñas fuertes (mínimo 10 caracteres, letras y números).
- * - El botón de pago solicita una sesión de cobro al backend (/api/create-checkout);
- *   nunca envía montos modificables desde el cliente ni marca órdenes como pagadas.
  */
 (function () {
   "use strict";
@@ -25,6 +24,14 @@
     supabaseAnonKey: typeof ENV.supabaseAnonKey === "string" ? ENV.supabaseAnonKey.trim() : "",
     apiBaseUrl: typeof ENV.apiBaseUrl === "string" ? ENV.apiBaseUrl.trim().replace(/\/+$/, "") : ""
   };
+
+  // Lista blanca estricta para mensajes informativos de retorno de pasarela (?pago=...)
+  const PAYMENT_RETURN_MESSAGES = Object.freeze({
+    pendiente_confirmacion:
+      "Recibimos tu retorno desde la pasarela de pago. En cuanto el banco/pasarela confirme la transferencia SPEI o cargo en nuestro servidor, el estado cambiará automáticamente a Acreditado.",
+    cancelado:
+      "El proceso de pago fue cancelado y no se realizó ningún cobro. Puedes reintentarlo desde tu panel cuando lo desees."
+  });
 
   // Sesión exclusivamente en memoria (protección frente a persistencia insegura en localStorage)
   let currentSession = null;
@@ -73,6 +80,28 @@
       return { ok: false, normalized: null };
     }
     return { ok: true, normalized: "+" + digits };
+  }
+
+  function resolvePaymentReturnMessage(searchString) {
+    if (typeof searchString !== "string" || !searchString) return null;
+    const cleaned = searchString.startsWith("?") ? searchString.slice(1) : searchString;
+    const pairs = cleaned.split("&");
+    for (let i = 0; i < pairs.length; i += 1) {
+      const idx = pairs[i].indexOf("=");
+      if (idx === -1) continue;
+      if (pairs[i].slice(0, idx).toLowerCase() === "pago") {
+        let val = "";
+        try {
+          val = decodeURIComponent(pairs[i].slice(idx + 1)).trim().toLowerCase();
+        } catch (err) {
+          return null;
+        }
+        if (Object.prototype.hasOwnProperty.call(PAYMENT_RETURN_MESSAGES, val)) {
+          return { key: val, text: PAYMENT_RETURN_MESSAGES[val] };
+        }
+      }
+    }
+    return null;
   }
 
   function formatCentsMXN(cents) {
@@ -320,6 +349,7 @@
     isValidEmail: isValidEmail,
     validatePasswordStrength: validatePasswordStrength,
     validateOptionalPhone: validateOptionalPhone,
+    resolvePaymentReturnMessage: resolvePaymentReturnMessage,
     formatCentsMXN: formatCentsMXN
   };
 
@@ -338,8 +368,16 @@
       disableAuthFormsWhenUnconfigured();
     }
 
-    const loginForm = document.getElementById("portal-login-form");
+    // Mostrar aviso seguro si el cliente regresa desde Stripe Checkout (?pago=...)
     const loginFeedback = document.getElementById("login-feedback");
+    if (typeof window !== "undefined" && window.location) {
+      const paymentReturn = resolvePaymentReturnMessage(window.location.search || "");
+      if (paymentReturn) {
+        setFeedback(loginFeedback, paymentReturn.text, paymentReturn.key === "cancelado");
+      }
+    }
+
+    const loginForm = document.getElementById("portal-login-form");
     if (loginForm) {
       loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
@@ -438,20 +476,6 @@
           if (!res.ok) {
             setFeedback(regFeedback, "No fue posible completar el registro. Verifica tus datos o intenta recuperar tu acceso.", true);
             return;
-          }
-
-          if (res.data && res.data.access_token && res.data.user && res.data.user.id) {
-            await apiRequest(PORTAL_CONFIG.supabaseUrl + "/rest/v1/profiles", {
-              method: "POST",
-              headers: supabaseHeaders(res.data.access_token),
-              body: JSON.stringify({
-                id: res.data.user.id,
-                full_name: fullName,
-                business_name: businessName || null,
-                phone_e164: phoneCheck.normalized,
-                role: "client"
-              })
-            });
           }
 
           regForm.reset();
