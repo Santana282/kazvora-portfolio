@@ -1,5 +1,5 @@
 /* ==========================================================================
-   KAZVORA Technologies — Sistema de Diseño Corporativo v2.1 (css/styles.css)
+   KAZVORA Technologies — Sistema de Diseño Corporativo v2.2 (css/styles.css)
    Identidad oficial:
    - Base:       #0b0d10
    - Rojo:       #ff454f / #d72e3b
@@ -1248,7 +1248,63 @@ ul {
   overflow: hidden;
 }
 
-/* 14. Adaptación Móvil (Responsive Design) */
+/* 14. Preguntas Frecuentes Nativas (.faq-list, .faq-item) */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.faq-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.45rem;
+  transition: border-color var(--transition-base);
+}
+
+.faq-item[open] {
+  border-color: var(--border-accent);
+}
+
+.faq-item summary {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: "+";
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.faq-item[open] summary::after {
+  content: "−";
+  color: var(--accent-red);
+}
+
+.faq-item p {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+}
+
+/* 15. Adaptación Móvil (Responsive Design) */
 @media (max-width: 1080px) {
   .pillars-grid {
     grid-template-columns: repeat(3, 1fr);

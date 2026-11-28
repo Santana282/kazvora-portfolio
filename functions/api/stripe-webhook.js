@@ -1,11 +1,16 @@
 /**
- * KAZVORA Technologies — Cloudflare Pages Function: Webhook Verificado de Pagos / SPEI
+ * KAZVORA Technologies — Cloudflare Pages Function: Webhook Verificado de Pagos / SPEI v2.6
  * Ruta: functions/api/stripe-webhook.js (desplegado en /api/stripe-webhook)
  *
- * SEGURIDAD CRIPTOGRÁFICA:
+ * SEGURIDAD CRIPTOGRÁFICA Y TRANSACCIONAL:
  * - Verifica firma HMAC-SHA256 de Stripe usando Web Crypto API (cero dependencias externas).
- * - Aplica ventana anti-replay de 300 segundos y comparación en tiempo constante.
- * - Único punto autorizado para marcar payment_orders.status = 'paid' en Supabase.
+ * - Ventana anti-replay de 300 segundos y comparación en tiempo constante.
+ * - Transiciones idempotentes: solo actualiza órdenes en estado 'pending' para evitar
+ *   sobrescribir registros acreditados o duplicar entradas de auditoría ante reintentos de Stripe.
+ * - Cubre el ciclo completo de pagos y transferencias SPEI:
+ *     * checkout.session.completed / async_payment_succeeded -> 'paid'
+ *     * checkout.session.expired -> 'expired'
+ *     * checkout.session.async_payment_failed -> 'failed'
  */
 
 const REPLAY_TOLERANCE_SECONDS = 300;
@@ -66,6 +71,54 @@ export async function verifyStripeSignature(rawBody, signatureHeader, webhookSec
     : { valid: false, reason: "Firma HMAC-SHA256 no coincide." };
 }
 
+async function transitionPendingOrder(supabaseBase, srvHeaders, session, nextStatus, eventType) {
+  const updateBody =
+    nextStatus === "paid"
+      ? { status: "paid", paid_at: new Date().toISOString() }
+      : { status: nextStatus };
+
+  // Solo actualiza si la orden sigue en 'pending' (idempotencia frente a reintentos)
+  const patchRes = await fetch(
+    supabaseBase +
+      "/rest/v1/payment_orders?provider_payment_id=eq." +
+      encodeURIComponent(session.id) +
+      "&status=eq.pending",
+    {
+      method: "PATCH",
+      headers: Object.assign({}, srvHeaders, { Prefer: "return=representation" }),
+      body: JSON.stringify(updateBody)
+    }
+  );
+
+  let updatedRows = [];
+  if (patchRes.ok) {
+    try {
+      const parsed = await patchRes.json();
+      if (Array.isArray(parsed)) updatedRows = parsed;
+    } catch (err) {
+      updatedRows = [];
+    }
+  }
+
+  // Registrar en bitácora solo cuando hubo una transición real de estado
+  if (updatedRows.length > 0) {
+    await fetch(supabaseBase + "/rest/v1/security_audit_logs", {
+      method: "POST",
+      headers: Object.assign({}, srvHeaders, { Prefer: "return=minimal" }),
+      body: JSON.stringify({
+        actor_id: session.metadata && session.metadata.client_id ? session.metadata.client_id : null,
+        action: "payment_status_" + nextStatus,
+        resource_type: "payment_orders",
+        resource_id: session.id,
+        metadata: {
+          event_type: eventType,
+          amount_total: session.amount_total || null
+        }
+      })
+    });
+  }
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -88,49 +141,31 @@ export async function onRequestPost(context) {
     return new Response("JSON inválido", { status: 400 });
   }
 
+  const session = event.data && event.data.object ? event.data.object : null;
+  if (!session || typeof session.id !== "string" || !session.id) {
+    return new Response(JSON.stringify({ received: true, ignored: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   const supabaseBase = env.SUPABASE_URL.replace(/\/+$/, "");
   const srvHeaders = {
     apikey: env.SUPABASE_SERVICE_ROLE_KEY,
     Authorization: "Bearer " + env.SUPABASE_SERVICE_ROLE_KEY,
-    "Content-Type": "application/json",
-    Prefer: "return=minimal"
+    "Content-Type": "application/json"
   };
 
   if (
-    event.type === "checkout.session.completed" ||
-    event.type === "checkout.session.async_payment_succeeded"
+    (event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded") &&
+    session.payment_status === "paid"
   ) {
-    const session = event.data && event.data.object ? event.data.object : null;
-    if (session && session.id && session.payment_status === "paid") {
-      await fetch(
-        supabaseBase +
-          "/rest/v1/payment_orders?provider_payment_id=eq." +
-          encodeURIComponent(session.id),
-        {
-          method: "PATCH",
-          headers: srvHeaders,
-          body: JSON.stringify({
-            status: "paid",
-            paid_at: new Date().toISOString()
-          })
-        }
-      );
-
-      await fetch(supabaseBase + "/rest/v1/security_audit_logs", {
-        method: "POST",
-        headers: srvHeaders,
-        body: JSON.stringify({
-          actor_id: session.metadata && session.metadata.client_id ? session.metadata.client_id : null,
-          action: "payment_verified_webhook",
-          resource_type: "payment_orders",
-          resource_id: session.id,
-          metadata: {
-            event_type: event.type,
-            amount_total: session.amount_total
-          }
-        })
-      });
-    }
+    await transitionPendingOrder(supabaseBase, srvHeaders, session, "paid", event.type);
+  } else if (event.type === "checkout.session.expired") {
+    await transitionPendingOrder(supabaseBase, srvHeaders, session, "expired", event.type);
+  } else if (event.type === "checkout.session.async_payment_failed") {
+    await transitionPendingOrder(supabaseBase, srvHeaders, session, "failed", event.type);
   }
 
   return new Response(JSON.stringify({ received: true }), {
